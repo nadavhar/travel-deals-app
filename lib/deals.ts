@@ -1,0 +1,500 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// TYPES
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type Category = 'vacation' | 'suite' | 'penthouse' | 'villa';
+
+export interface RawDeal {
+  id: number;
+  category: Category;
+  property_name: string;
+  /** Clean city / region name — e.g. "אילת", "גליל עליון" */
+  location: string;
+  /** Agent rule: silently drop any deal where this is false */
+  is_in_israel: boolean;
+  price_per_night_ils: number;
+  description: string;
+  /** Original scraped deal page URL */
+  url: string;
+}
+
+/** Clean output shape — no internal filtering fields, no image field */
+export interface Deal {
+  id: number;
+  category: Category;
+  property_name: string;
+  location: string;
+  price_per_night_ils: number;
+  description: string;
+  url: string;
+}
+
+export interface FilterResult {
+  validDeals: Deal[];
+  rejectedCount: number;
+  rejectedByLocation: number;
+  rejectedByBudget: number;
+  rejectionReasons: Array<{ name: string; reason: string }>;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AGENT RULES
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Maximum price per night (ILS) by category */
+export const BUDGET_LIMITS: Record<Category, number> = {
+  vacation: 450,
+  suite: 450,
+  penthouse: 990,
+  villa: 1990,
+};
+
+export const CATEGORY_LABELS: Record<Category, string> = {
+  vacation: 'חופשה',
+  suite: 'סוויטה',
+  penthouse: 'פנטהאוז',
+  villa: 'וילה',
+};
+
+export const CATEGORY_COLORS: Record<Category, string> = {
+  vacation: 'bg-sky-100 text-sky-800',
+  suite: 'bg-purple-100 text-purple-800',
+  penthouse: 'bg-amber-100 text-amber-800',
+  villa: 'bg-emerald-100 text-emerald-800',
+};
+
+export const CATEGORY_ACCENT: Record<Category, string> = {
+  vacation: 'bg-sky-500',
+  suite: 'bg-purple-500',
+  penthouse: 'bg-amber-500',
+  villa: 'bg-emerald-500',
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SAMPLE PAYLOAD  (23 valid · 13 invalid — mix of location & budget violations)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const RAW_DEALS: RawDeal[] = [
+
+  // ── VALID ────────────────────────────────────────────────────────────────
+
+  {
+    id: 1,
+    category: 'vacation',
+    property_name: 'מלון בוטיק יפו',
+    location: 'יפו, תל אביב',
+    is_in_israel: true,
+    price_per_night_ils: 420,
+    description: 'מלון בוטיק קסום בלב יפו העתיקה עם נוף לים ואווירה מדהימה. כולל ארוחת בוקר עשירה ומרפסת פרטית.',
+    url: 'https://www.booking.com/hotel/il/boutique-jaffa.he.html',
+  },
+  {
+    id: 2,
+    category: 'vacation',
+    property_name: 'צימר הכנרת',
+    location: 'טבריה',
+    is_in_israel: true,
+    price_per_night_ils: 380,
+    description: 'צימר נעים עם נוף פנורמי עוצר נשימה לכנרת. שקט מוחלט, מרפסת ענקית וסגנון כפרי חמים.',
+    url: 'https://www.airbnb.com/rooms/kinneret-zimmer',
+  },
+  {
+    id: 3,
+    category: 'vacation',
+    property_name: 'בית הארחה הכרמל',
+    location: 'חיפה',
+    is_in_israel: true,
+    price_per_night_ils: 320,
+    description: 'לינה וארוחת בוקר ביתית בלב הכרמל עם נוף לים התיכון. מיקום אידיאלי לסיורים בעיר.',
+    url: 'https://www.booking.com/hotel/il/carmel-bb-haifa.he.html',
+  },
+  {
+    id: 4,
+    category: 'vacation',
+    property_name: 'אכסניית מצפה רמון',
+    location: 'מצפה רמון',
+    is_in_israel: true,
+    price_per_night_ils: 290,
+    description: 'לינה ייחודית על שפת המכתש הגדול בעולם. כולל טיול לילי לצפייה בכוכבים וארוחת בוקר ישראלית.',
+    url: 'https://www.booking.com/hotel/il/ramon-crater-hostel.he.html',
+  },
+  {
+    id: 5,
+    category: 'suite',
+    property_name: 'סוויטת מלכים ירושלים',
+    location: 'ירושלים',
+    is_in_israel: true,
+    price_per_night_ils: 440,
+    description: "סוויטה מפוארת מול חומות העיר העתיקה עם ג'קוזי פרטי ועיצוב מזרחי ייחודי.",
+    url: 'https://www.booking.com/hotel/il/suite-kings-jerusalem.he.html',
+  },
+  {
+    id: 6,
+    category: 'suite',
+    property_name: 'סוויטת ספא ים המלח',
+    location: 'ים המלח',
+    is_in_israel: true,
+    price_per_night_ils: 410,
+    description: 'סוויטה מפנקת עם גישה ישירה לחוף ים המלח, טיפולי ספא כלולים ומרפסת פרטית עם נוף ירדן.',
+    url: 'https://www.booking.com/hotel/il/dead-sea-spa-suite.he.html',
+  },
+  {
+    id: 7,
+    category: 'penthouse',
+    property_name: 'פנטהאוז הרצליה פיתוח',
+    location: 'הרצליה פיתוח',
+    is_in_israel: true,
+    price_per_night_ils: 850,
+    description: "פנטהאוז יוקרתי עם בריכה פרטית על הגג ונוף 360° לים התיכון. עיצוב אדריכלי מרהיב, שרות קונסיירז'.",
+    url: 'https://www.airbnb.com/rooms/herzliya-penthouse',
+  },
+  {
+    id: 8,
+    category: 'penthouse',
+    property_name: 'פנטהאוז קיסריה',
+    location: 'קיסריה',
+    is_in_israel: true,
+    price_per_night_ils: 750,
+    description: 'פנטהאוז מודרני ליד שדה הגולף ומהרומן ההיסטורי של קיסריה. שרות אישי ומרפסת עם נוף לים.',
+    url: 'https://www.airbnb.com/rooms/caesarea-penthouse',
+  },
+  {
+    id: 9,
+    category: 'villa',
+    property_name: 'וילה הגליל העליון',
+    location: 'גליל עליון',
+    is_in_israel: true,
+    price_per_night_ils: 1800,
+    description: 'וילה פרטית מפוארת בלב הגליל: בריכה, 5 חדרי שינה, גינה ירוקה ויער. מושלם לאירועים ומשפחות.',
+    url: 'https://www.airbnb.com/rooms/upper-galilee-villa',
+  },
+  {
+    id: 10,
+    category: 'villa',
+    property_name: 'וילת החוף אשקלון',
+    location: 'אשקלון',
+    is_in_israel: true,
+    price_per_night_ils: 1650,
+    description: 'וילה יוקרתית ישירות על הים עם בריכה מחוממת, 4 חדרי שינה ויציאה פרטית לחוף חולי מושלם.',
+    url: 'https://www.airbnb.com/rooms/ashkelon-beach-villa',
+  },
+  {
+    id: 19,
+    category: 'vacation',
+    property_name: 'אברהם הוסטל תל אביב',
+    location: 'תל אביב',
+    is_in_israel: true,
+    price_per_night_ils: 240,
+    description: 'אחד המקומות הפופולריים ביותר בתל אביב לטיילים. אווירה תוססת, בר ברחבה וחדרים נוחים במחיר מצוין.',
+    url: 'https://abrahamhostels.com/tel-aviv/',
+  },
+  {
+    id: 20,
+    category: 'vacation',
+    property_name: 'פאוזי עזאר אין',
+    location: 'נצרת',
+    is_in_israel: true,
+    price_per_night_ils: 310,
+    description: 'אחוזה ערבית בת 200 שנה בלב הרובע הנוצרי של נצרת. קירות אבן, תקרות קמרונות ואווירה ייחודית.',
+    url: 'https://www.fauziazarinn.com/',
+  },
+  {
+    id: 21,
+    category: 'vacation',
+    property_name: 'בית הארחה קיבוץ כנרת',
+    location: 'כנרת, עמק הירדן',
+    is_in_israel: true,
+    price_per_night_ils: 265,
+    description: 'הקיבוץ ההיסטורי הראשון בישראל. לינה על שפת הכנרת, גינות מטופחות ובריכה.',
+    url: 'https://www.booking.com/hotel/il/kvutzat-kinneret.he.html',
+  },
+  {
+    id: 22,
+    category: 'vacation',
+    property_name: 'אכסניית עין גדי',
+    location: 'עין גדי, ים המלח',
+    is_in_israel: true,
+    price_per_night_ils: 370,
+    description: 'שוכנת בתוך שמורת הטבע של עין גדי, 10 דקות ממצדה. ארוחת בוקר בופה כלולה ובריכת שחייה.',
+    url: 'https://www.eingedi.co.il/',
+  },
+  {
+    id: 23,
+    category: 'vacation',
+    property_name: 'אייביס תל אביב',
+    location: 'תל אביב',
+    is_in_israel: true,
+    price_per_night_ils: 390,
+    description: 'מלון רשת בינלאומי במיקום מרכזי על יד שוק הכרמל. חדרים מודרניים, נקיים ונוחים.',
+    url: 'https://all.accor.com/hotel/8767/index.he.shtml',
+  },
+  {
+    id: 24,
+    category: 'vacation',
+    property_name: 'אברהם הוסטל ירושלים',
+    location: 'ירושלים',
+    is_in_israel: true,
+    price_per_night_ils: 220,
+    description: 'מרחק הליכה משוק מחנה יהודה ושער יפו. בר גג פנורמי, אירועי תרבות כל ערב וחדרים לכל כיס.',
+    url: 'https://abrahamhostels.com/jerusalem/',
+  },
+  {
+    id: 25,
+    category: 'suite',
+    property_name: 'סוויטת קיבוץ נחשולים',
+    location: 'נחשולים, חוף הכרמל',
+    is_in_israel: true,
+    price_per_night_ils: 430,
+    description: 'סוויטה בקיבוץ מלון ישירות על חוף הים התיכון. שרידי עיר פיניקית עתיקה, בריכה וחוף פרטי לאורחים.',
+    url: 'https://www.booking.com/hotel/il/nahsholim.he.html',
+  },
+  {
+    id: 26,
+    category: 'suite',
+    property_name: 'סוויטת ספא מלון ערד',
+    location: 'ערד',
+    is_in_israel: true,
+    price_per_night_ils: 415,
+    description: 'ערד נחשבת לעיר עם האוויר הנקי ביותר בישראל. סוויטת ספא עם נוף למדבר, 30 דקות ממצדה.',
+    url: 'https://www.booking.com/hotel/il/arad-spa.he.html',
+  },
+  {
+    id: 27,
+    category: 'suite',
+    property_name: 'סוויטת אלמוגים אילת',
+    location: 'אילת',
+    is_in_israel: true,
+    price_per_night_ils: 445,
+    description: 'סוויטה ממש על הטיילת עם נוף לים סוף ולהרי אדום. כולל גישה לבריכה, ספא וארוחת בוקר מפנקת.',
+    url: 'https://www.booking.com/hotel/il/almogim-eilat.he.html',
+  },
+  {
+    id: 28,
+    category: 'penthouse',
+    property_name: "לאונרדו קלאב אילת — פנטהאוז",
+    location: 'אילת',
+    is_in_israel: true,
+    price_per_night_ils: 870,
+    description: "ריזורט הכל-כלול המוביל של אילת עם גישה ל-7 בריכות. פנטהאוז עם מרפסת פרטית, ג'קוזי ונוף לשמורת האלמוגים.",
+    url: 'https://www.leonardo-hotels.co.il/he/eilat/leonardo-club-eilat',
+  },
+  {
+    id: 29,
+    category: 'penthouse',
+    property_name: 'פנטהאוז דן קיסריה',
+    location: 'קיסריה',
+    is_in_israel: true,
+    price_per_night_ils: 940,
+    description: 'פנטהאוז בלעדי בריזורט הגולף של דן קיסריה. מגרש גולף בינלאומי ורצועת חוף מרהיבה צמודים.',
+    url: 'https://www.danhotels.com/caesareahotels',
+  },
+  {
+    id: 30,
+    category: 'villa',
+    property_name: 'וילה רמת הגולן',
+    location: 'רמת הגולן',
+    is_in_israel: true,
+    price_per_night_ils: 1720,
+    description: 'וילה מפנקת עם נוף להר חרמון. בריכה מחוממת, 4 חדרי שינה, מרפסת ענקית ויין מיקב שכן.',
+    url: 'https://www.airbnb.com/rooms/golan-villa',
+  },
+  {
+    id: 31,
+    category: 'villa',
+    property_name: 'וילת גבעות יהודה',
+    location: 'שפלת יהודה',
+    is_in_israel: true,
+    price_per_night_ils: 1480,
+    description: 'וילה כפרית בין כרמי ענבים וגנים, 40 דקות מתל אביב. גינה ים-תיכונית, בריכה ו-3 חדרי שינה.',
+    url: 'https://www.airbnb.com/rooms/judean-hills-villa',
+  },
+
+  // ── INVALID — silently dropped by the agent ───────────────────────────────
+
+  // 🌍 Location violations (not in Israel)
+  {
+    id: 11,
+    category: 'vacation',
+    property_name: 'Hotel de Paris Montmartre',
+    location: 'פריז, צרפת',
+    is_in_israel: false,
+    price_per_night_ils: 310,
+    description: 'מלון רומנטי בשכונת מונמארטר.',
+    url: '#',
+  },
+  {
+    id: 12,
+    category: 'villa',
+    property_name: 'Villa Toscana Classica',
+    location: 'טוסקנה, איטליה',
+    is_in_israel: false,
+    price_per_night_ils: 1700,
+    description: 'וילה מסורתית בין כרמי ענבים בטוסקנה.',
+    url: '#',
+  },
+  {
+    id: 13,
+    category: 'suite',
+    property_name: 'Athens Grand Suite',
+    location: 'אתונה, יוון',
+    is_in_israel: false,
+    price_per_night_ils: 380,
+    description: 'סוויטה עם נוף לאקרופוליס.',
+    url: '#',
+  },
+  {
+    id: 14,
+    category: 'villa',
+    property_name: 'Miami Beach Villa',
+    location: 'מיאמי, ארה"ב',
+    is_in_israel: false,
+    price_per_night_ils: 2800,
+    description: 'וילה ענקית על חוף מיאמי.',
+    url: '#',
+  },
+  {
+    id: 32,
+    category: 'suite',
+    property_name: 'Aphrodite Hills Suite Cyprus',
+    location: 'פאפוס, קפריסין',
+    is_in_israel: false,
+    price_per_night_ils: 420,
+    description: 'ריזורט יוקרתי בקפריסין. קרוב לישראל — אבל לא ישראל.',
+    url: '#',
+  },
+  {
+    id: 33,
+    category: 'penthouse',
+    property_name: 'Burj Al Arab Penthouse',
+    location: 'דובאי, איחוד האמירויות',
+    is_in_israel: false,
+    price_per_night_ils: 980,
+    description: 'פנטהאוז יוקרה בדובאי.',
+    url: '#',
+  },
+  {
+    id: 34,
+    category: 'villa',
+    property_name: 'וילת שארם אל-שיח',
+    location: 'שארם אל-שיח, מצרים',
+    is_in_israel: false,
+    price_per_night_ils: 1600,
+    description: 'וילה פרטית ליד שמורת האלמוגים של שארם — סיני, לא ישראל.',
+    url: '#',
+  },
+
+  // 💸 Budget violations (in Israel, but price exceeds category limit)
+  {
+    id: 15,
+    category: 'suite',
+    property_name: 'סוויטת גראנד תל אביב',
+    location: 'תל אביב',
+    is_in_israel: true,
+    price_per_night_ils: 520, // limit 450 — over by 70 ₪
+    description: 'סוויטה יוקרתית במגדל יוקרה במרכז תל אביב.',
+    url: '#',
+  },
+  {
+    id: 16,
+    category: 'penthouse',
+    property_name: 'פנטהאוז מגדל ים',
+    location: 'תל אביב',
+    is_in_israel: true,
+    price_per_night_ils: 1200, // limit 990 — over by 210 ₪
+    description: 'פנטהאוז על קו הים בתל אביב.',
+    url: '#',
+  },
+  {
+    id: 17,
+    category: 'vacation',
+    property_name: 'בית הארחה ירושלים',
+    location: 'ירושלים',
+    is_in_israel: true,
+    price_per_night_ils: 460, // limit 450 — over by just 10 ₪!
+    description: 'בית הארחה נעים בירושלים. נפסל בגלל 10 ₪ בלבד.',
+    url: '#',
+  },
+  {
+    id: 18,
+    category: 'penthouse',
+    property_name: 'פנטהאוז איילת השחר',
+    location: 'אילת',
+    is_in_israel: true,
+    price_per_night_ils: 995, // limit 990 — over by just 5 ₪!
+    description: 'פנטהאוז מרהיב בקצה דרום ישראל. נפסל ב-5 ₪ בלבד!',
+    url: '#',
+  },
+  {
+    id: 35,
+    category: 'vacation',
+    property_name: 'מלון ענת בת ים',
+    location: 'בת ים',
+    is_in_israel: true,
+    price_per_night_ils: 451, // limit 450 — over by just 1 ₪!!
+    description: 'מלון נוח ליד הים. נפסל ב-1 ₪ בלבד — חוק הוא חוק!',
+    url: '#',
+  },
+  {
+    id: 36,
+    category: 'villa',
+    property_name: 'וילת הבוטיק ראש פינה',
+    location: 'ראש פינה',
+    is_in_israel: true,
+    price_per_night_ils: 2100, // limit 1990 — over by 110 ₪
+    description: 'וילה עיצובית בראש פינה ההיסטורית. יפה מאוד, אבל חורגת מהתקציב.',
+    url: '#',
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FILTERING FUNCTION  (the "agent" rules engine)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function filterDeals(rawDeals: RawDeal[]): FilterResult {
+  const validDeals: Deal[] = [];
+  const rejectionReasons: Array<{ name: string; reason: string }> = [];
+  let rejectedByLocation = 0;
+  let rejectedByBudget = 0;
+
+  for (const deal of rawDeals) {
+    // Rule 1 — Location: only Israel
+    if (!deal.is_in_israel) {
+      rejectedByLocation++;
+      rejectionReasons.push({
+        name: deal.property_name,
+        reason: `נכס מחוץ לישראל (${deal.location})`,
+      });
+      continue;
+    }
+
+    // Rule 2 — Price: must NOT exceed category max by even 1 ₪
+    const limit = BUDGET_LIMITS[deal.category];
+    if (deal.price_per_night_ils > limit) {
+      rejectedByBudget++;
+      rejectionReasons.push({
+        name: deal.property_name,
+        reason: `₪${deal.price_per_night_ils.toLocaleString('he-IL')} > מקסימום ₪${limit.toLocaleString('he-IL')} (+${deal.price_per_night_ils - limit} ₪)`,
+      });
+      continue;
+    }
+
+    // Rule 3 — Output clean Deal (no internal fields, no image field)
+    validDeals.push({
+      id: deal.id,
+      category: deal.category,
+      property_name: deal.property_name,
+      location: deal.location,
+      price_per_night_ils: deal.price_per_night_ils,
+      description: deal.description,
+      url: deal.url,
+    });
+  }
+
+  return {
+    validDeals,
+    rejectedCount: rejectedByLocation + rejectedByBudget,
+    rejectedByLocation,
+    rejectedByBudget,
+    rejectionReasons,
+  };
+}
