@@ -2,7 +2,7 @@
 
 A full-stack Israeli budget travel deal hunter built with **Next.js 16**, **TypeScript**, and **Tailwind CSS**.
 
-The app simulates an AI agent that scrapes travel listings, enforces strict budget rules per category, drops non-Israeli properties, and surfaces only the deals that truly pass the filter.
+The app simulates an AI agent that scrapes travel listings, enforces strict budget rules per category, drops non-Israeli properties, validates deep links, and surfaces only the deals that truly pass the filter.
 
 ![App Screenshot](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/MakhteshRamonMar262022_01.jpg/1200px-MakhteshRamonMar262022_01.jpg)
 
@@ -10,13 +10,14 @@ The app simulates an AI agent that scrapes travel listings, enforces strict budg
 
 ## ✨ Features
 
-- **Agent filtering engine** — strict per-category ILS price caps, drops non-Israeli properties and any deal exceeding the limit by even 1 ₪
+- **Agent filtering engine** — 3-rule pipeline: location (Israel only) → budget cap → deep link validation
+- **Deep link validation** — any URL that is missing, relative, hash-only, or starts with `http://` is silently dropped
 - **Location-based landscape images** — each card automatically shows a real photo of its region (Jaffa, Jerusalem, Dead Sea, Eilat, Haifa, Ramon Crater, Kinneret, Golan, Caesarea, Nazareth, Negev, Tel Aviv) via Wikimedia Commons CDN
 - **Hebrew RTL UI** — fully right-to-left layout with Heebo font
 - **Interactive category tabs** — filter by Vacation / Suite / Penthouse / Villa with live deal counts
-- **Rejected deals panel** — collapsible panel showing every filtered-out deal and the exact reason (location or budget violation)
+- **Colour-coded rejected deals panel** — collapsible panel showing every filtered-out deal with its exact reason: 🌍 location · 💸 budget · 🔗 URL
 - **Responsive grid** — 1 column on mobile → 3 columns on desktop
-- **Direct booking links** — "להזמנה ↗" CTA opens the original deal URL in a new tab
+- **Direct booking deep links** — "להזמנה ↗" CTA opens the exact deal page in a new tab (`target="_blank"`)
 
 ---
 
@@ -31,7 +32,20 @@ The app simulates an AI agent that scrapes travel listings, enforces strict budg
 
 - Any deal **exceeding the limit by even 1 ₪** is silently dropped
 - Any property **outside Israel** is silently dropped
+- Any deal whose `url` is missing, relative, hash-only, or not `https://` is silently dropped
 - Output schema contains: `category`, `property_name`, `location`, `price_per_night_ils`, `description`, `url` — **no image field** (images are derived from location at render time)
+
+### 🔗 Deep Link Validation (Rule 3)
+
+The agent enforces that every deal must have a valid, absolute `https://` deep link pointing directly to the property page — not a search results page, not a relative path, not an insecure `http://` URL.
+
+| URL value | Result |
+|---|---|
+| `https://booking.com/hotel/il/...` | ✅ Valid |
+| `''` (empty) | 🔗 Dropped |
+| `'/rooms/kinneret-suite'` | 🔗 Dropped (relative) |
+| `'http://old-site.co.il/...'` | 🔗 Dropped (not https) |
+| `'#villa-search-results'` | 🔗 Dropped (hash only) |
 
 ---
 
