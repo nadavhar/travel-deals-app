@@ -14,7 +14,7 @@ import {
 import { getLocationImage, LOCATION_IMAGE_MAP } from '@/lib/locationImages';
 
 // ─── Run the agent filter once at module level ───────────────────────────────
-const { validDeals, rejectedCount, rejectedByLocation, rejectedByBudget, rejectionReasons } =
+const { validDeals, rejectedCount, rejectedByLocation, rejectedByBudget, rejectedByUrl, rejectionReasons } =
   filterDeals(RAW_DEALS);
 
 // ─── Filter tabs ─────────────────────────────────────────────────────────────
@@ -105,30 +105,44 @@ export default function Home() {
               </button>
             </div>
             <p className="text-xs text-gray-400">
-              {rejectedByLocation} מחוץ לישראל &nbsp;·&nbsp; {rejectedByBudget} חריגת תקציב
+              {rejectedByLocation} מחוץ לישראל &nbsp;·&nbsp; {rejectedByBudget} חריגת תקציב &nbsp;·&nbsp; {rejectedByUrl} URL שבור
             </p>
           </div>
 
           {/* Rejected panel */}
           {showRejected && (
             <div className="mt-3 rounded-xl border border-red-100 bg-red-50 p-4">
-              <h3 className="mb-2.5 flex items-center gap-1.5 text-sm font-bold text-red-700">
-                <span>🚫</span> דילים שנפסלו על ידי הסוכן:
-              </h3>
+              <div className="mb-3 flex flex-wrap items-center gap-3">
+                <h3 className="flex items-center gap-1.5 text-sm font-bold text-red-700">
+                  <span>🚫</span> דילים שנפסלו על ידי הסוכן:
+                </h3>
+                <div className="flex gap-2 text-xs">
+                  <span className="rounded-full bg-red-100 px-2 py-0.5 text-red-700">🌍 {rejectedByLocation} מיקום</span>
+                  <span className="rounded-full bg-orange-100 px-2 py-0.5 text-orange-700">💸 {rejectedByBudget} תקציב</span>
+                  <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-yellow-700">🔗 {rejectedByUrl} URL</span>
+                </div>
+              </div>
               <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-                {rejectionReasons.map((r, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-2 rounded-lg border border-red-100 bg-white px-3 py-2 text-xs"
-                  >
-                    <span className="mt-0.5 shrink-0 text-red-400">✗</span>
-                    <div>
-                      <span className="font-semibold text-gray-800">{r.name}</span>
-                      <span className="mx-1.5 text-gray-300">—</span>
-                      <span className="text-red-500">{r.reason}</span>
+                {rejectionReasons.map((r, i) => {
+                  const styles = {
+                    location: { border: 'border-red-100',    icon: '🌍', text: 'text-red-500' },
+                    budget:   { border: 'border-orange-100', icon: '💸', text: 'text-orange-500' },
+                    url:      { border: 'border-yellow-100', icon: '🔗', text: 'text-yellow-600' },
+                  }[r.type];
+                  return (
+                    <div
+                      key={i}
+                      className={`flex items-start gap-2 rounded-lg border ${styles.border} bg-white px-3 py-2 text-xs`}
+                    >
+                      <span className="mt-0.5 shrink-0">{styles.icon}</span>
+                      <div>
+                        <span className="font-semibold text-gray-800">{r.name}</span>
+                        <span className="mx-1.5 text-gray-300">—</span>
+                        <span className={styles.text}>{r.reason}</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

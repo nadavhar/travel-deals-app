@@ -34,7 +34,13 @@ export interface FilterResult {
   rejectedCount: number;
   rejectedByLocation: number;
   rejectedByBudget: number;
-  rejectionReasons: Array<{ name: string; reason: string }>;
+  rejectedByUrl: number;
+  rejectionReasons: Array<{ name: string; reason: string; type: 'location' | 'budget' | 'url' }>;
+}
+
+/** Rule 3 — URL must be a valid absolute https:// deep link */
+function isValidDeepLink(url: string): boolean {
+  return typeof url === 'string' && url.startsWith('https://');
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -71,7 +77,7 @@ export const CATEGORY_ACCENT: Record<Category, string> = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SAMPLE PAYLOAD  (23 valid · 13 invalid — mix of location & budget violations)
+// SAMPLE PAYLOAD  (23 valid · 17 invalid — location, budget & URL violations)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const RAW_DEALS: RawDeal[] = [
@@ -444,6 +450,48 @@ export const RAW_DEALS: RawDeal[] = [
     description: 'וילה עיצובית בראש פינה ההיסטורית. יפה מאוד, אבל חורגת מהתקציב.',
     url: '#',
   },
+
+  // 🔗 URL validation violations (in Israel, within budget — dropped for bad URL)
+  {
+    id: 37,
+    category: 'vacation',
+    property_name: 'צימר גנים בגליל',
+    location: 'גליל',
+    is_in_israel: true,
+    price_per_night_ils: 320,
+    description: 'צימר ירוק בלב הגליל עם בריכה ומרפסת. נפסל: URL חסר לחלוטין.',
+    url: '', // DROPPED: empty URL
+  },
+  {
+    id: 38,
+    category: 'suite',
+    property_name: 'סוויטת הכנרת העליונה',
+    location: 'טבריה',
+    is_in_israel: true,
+    price_per_night_ils: 380,
+    description: 'סוויטה עם נוף ישיר לכנרת. נפסל: URL יחסי ולא מוחלט.',
+    url: '/rooms/kinneret-suite-tiberias', // DROPPED: relative URL
+  },
+  {
+    id: 39,
+    category: 'penthouse',
+    property_name: 'פנטהאוז ים תיכון נתניה',
+    location: 'נתניה',
+    is_in_israel: true,
+    price_per_night_ils: 780,
+    description: 'פנטהאוז עם נוף לים. נפסל: http:// — חייב להיות https://.',
+    url: 'http://old-travel-site.co.il/penthouse-netanya', // DROPPED: http not https
+  },
+  {
+    id: 40,
+    category: 'villa',
+    property_name: 'וילה הכרם יהודה',
+    location: 'שפלת יהודה',
+    is_in_israel: true,
+    price_per_night_ils: 1750,
+    description: 'וילה בין כרמי ענבים. נפסל: URL שבור — מפנה לדף חיפוש כללי, לא לנכס.',
+    url: '#villa-search-results', // DROPPED: hash-only / not absolute https
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -452,9 +500,10 @@ export const RAW_DEALS: RawDeal[] = [
 
 export function filterDeals(rawDeals: RawDeal[]): FilterResult {
   const validDeals: Deal[] = [];
-  const rejectionReasons: Array<{ name: string; reason: string }> = [];
+  const rejectionReasons: Array<{ name: string; reason: string; type: 'location' | 'budget' | 'url' }> = [];
   let rejectedByLocation = 0;
   let rejectedByBudget = 0;
+  let rejectedByUrl = 0;
 
   for (const deal of rawDeals) {
     // Rule 1 — Location: only Israel
@@ -463,6 +512,7 @@ export function filterDeals(rawDeals: RawDeal[]): FilterResult {
       rejectionReasons.push({
         name: deal.property_name,
         reason: `נכס מחוץ לישראל (${deal.location})`,
+        type: 'location',
       });
       continue;
     }
@@ -474,11 +524,24 @@ export function filterDeals(rawDeals: RawDeal[]): FilterResult {
       rejectionReasons.push({
         name: deal.property_name,
         reason: `₪${deal.price_per_night_ils.toLocaleString('he-IL')} > מקסימום ₪${limit.toLocaleString('he-IL')} (+${deal.price_per_night_ils - limit} ₪)`,
+        type: 'budget',
       });
       continue;
     }
 
-    // Rule 3 — Output clean Deal (no internal fields, no image field)
+    // Rule 3 — URL: must be a valid absolute https:// deep link
+    if (!isValidDeepLink(deal.url)) {
+      rejectedByUrl++;
+      const urlPreview = deal.url ? `"${deal.url.substring(0, 35)}${deal.url.length > 35 ? '…' : ''}"` : 'חסר';
+      rejectionReasons.push({
+        name: deal.property_name,
+        reason: `Deep link לא תקין — URL ${urlPreview}`,
+        type: 'url',
+      });
+      continue;
+    }
+
+    // ✅ All rules passed — output clean Deal
     validDeals.push({
       id: deal.id,
       category: deal.category,
@@ -492,9 +555,10 @@ export function filterDeals(rawDeals: RawDeal[]): FilterResult {
 
   return {
     validDeals,
-    rejectedCount: rejectedByLocation + rejectedByBudget,
+    rejectedCount: rejectedByLocation + rejectedByBudget + rejectedByUrl,
     rejectedByLocation,
     rejectedByBudget,
+    rejectedByUrl,
     rejectionReasons,
   };
 }
