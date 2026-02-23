@@ -92,7 +92,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 420,
     description: 'מלון בוטיק קסום בלב יפו העתיקה עם נוף לים ואווירה מדהימה. כולל ארוחת בוקר עשירה ומרפסת פרטית.',
-    url: 'https://www.booking.com/hotel/il/boutique-jaffa.he.html',
+    url: 'https://www.booking.com/hotel/il/margosa-tel-aviv-jaffa.html',
   },
   {
     id: 2,
@@ -102,7 +102,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 380,
     description: 'צימר נעים עם נוף פנורמי עוצר נשימה לכנרת. שקט מוחלט, מרפסת ענקית וסגנון כפרי חמים.',
-    url: 'https://www.airbnb.com/rooms/kinneret-zimmer',
+    url: 'https://www.booking.com/hotel/il/ginosar-inn-country-lodging.html',
   },
   {
     id: 3,
@@ -112,7 +112,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 320,
     description: 'לינה וארוחת בוקר ביתית בלב הכרמל עם נוף לים התיכון. מיקום אידיאלי לסיורים בעיר.',
-    url: 'https://www.booking.com/hotel/il/carmel-bb-haifa.he.html',
+    url: 'https://www.booking.com/hotel/il/haifa-guest-house-haifa.html',
   },
   {
     id: 4,
@@ -122,7 +122,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 290,
     description: 'לינה ייחודית על שפת המכתש הגדול בעולם. כולל טיול לילי לצפייה בכוכבים וארוחת בוקר ישראלית.',
-    url: 'https://www.booking.com/hotel/il/ramon-crater-hostel.he.html',
+    url: 'https://www.booking.com/hotel/il/mitzpe-ramon-youth-hostel.html',
   },
   {
     id: 5,
@@ -132,7 +132,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 440,
     description: "סוויטה מפוארת מול חומות העיר העתיקה עם ג'קוזי פרטי ועיצוב מזרחי ייחודי.",
-    url: 'https://www.booking.com/hotel/il/suite-kings-jerusalem.he.html',
+    url: 'https://www.21floorhotel.com/',
   },
   {
     id: 6,
@@ -142,7 +142,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 410,
     description: 'סוויטה מפנקת עם גישה ישירה לחוף ים המלח, טיפולי ספא כלולים ומרפסת פרטית עם נוף ירדן.',
-    url: 'https://www.booking.com/hotel/il/dead-sea-spa-suite.he.html',
+    url: 'https://www.lothotel.com/',
   },
   {
     id: 7,
@@ -152,7 +152,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 850,
     description: "פנטהאוז יוקרתי עם בריכה פרטית על הגג ונוף 360° לים התיכון. עיצוב אדריכלי מרהיב, שרות קונסיירז'.",
-    url: 'https://www.airbnb.com/rooms/herzliya-penthouse',
+    url: 'https://www.airbnb.com/rooms/25159305',
   },
   {
     id: 8,
@@ -162,7 +162,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 750,
     description: 'פנטהאוז מודרני ליד שדה הגולף ומהרומן ההיסטורי של קיסריה. שרות אישי ומרפסת עם נוף לים.',
-    url: 'https://www.airbnb.com/rooms/caesarea-penthouse',
+    url: 'https://www.airbnb.com/rooms/15983768',
   },
   {
     id: 9,
@@ -172,7 +172,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 1800,
     description: 'וילה פרטית מפוארת בלב הגליל: בריכה, 5 חדרי שינה, גינה ירוקה ויער. מושלם לאירועים ומשפחות.',
-    url: 'https://www.airbnb.com/rooms/upper-galilee-villa',
+    url: 'https://www.airbnb.com/eastern-upper-galilee-israel/stays/villas',
   },
   {
     id: 10,
@@ -182,7 +182,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 1650,
     description: 'וילה יוקרתית ישירות על הים עם בריכה מחוממת, 4 חדרי שינה ויציאה פרטית לחוף חולי מושלם.',
-    url: 'https://www.airbnb.com/rooms/ashkelon-beach-villa',
+    url: 'https://www.airbnb.com/rooms/938761621123676466',
   },
   {
     id: 19,
@@ -212,7 +212,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 265,
     description: 'הקיבוץ ההיסטורי הראשון בישראל. לינה על שפת הכנרת, גינות מטופחות ובריכה.',
-    url: 'https://www.booking.com/hotel/il/kvutzat-kinneret.he.html',
+    url: 'https://www.booking.com/hotel/il/ginosar-inn-country-lodging.html',
   },
   {
     id: 22,
@@ -222,7 +222,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 370,
     description: 'שוכנת בתוך שמורת הטבע של עין גדי, 10 דקות ממצדה. ארוחת בוקר בופה כלולה ובריכת שחייה.',
-    url: 'https://www.eingedi.co.il/',
+    url: 'https://www.booking.com/hotel/il/ein-gedi.html',
   },
   {
     id: 23,
@@ -252,7 +252,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 430,
     description: 'סוויטה בקיבוץ מלון ישירות על חוף הים התיכון. שרידי עיר פיניקית עתיקה, בריכה וחוף פרטי לאורחים.',
-    url: 'https://www.booking.com/hotel/il/nahsholim.he.html',
+    url: 'https://www.booking.com/hotel/il/nachsholim.html',
   },
   {
     id: 26,
@@ -262,7 +262,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 415,
     description: 'ערד נחשבת לעיר עם האוויר הנקי ביותר בישראל. סוויטת ספא עם נוף למדבר, 30 דקות ממצדה.',
-    url: 'https://www.booking.com/hotel/il/arad-spa.he.html',
+    url: 'https://www.booking.com/hotel/il/yehelim-boutique.html',
   },
   {
     id: 27,
@@ -272,7 +272,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 445,
     description: 'סוויטה ממש על הטיילת עם נוף לים סוף ולהרי אדום. כולל גישה לבריכה, ספא וארוחת בוקר מפנקת.',
-    url: 'https://www.booking.com/hotel/il/almogim-eilat.he.html',
+    url: 'https://www.booking.com/hotel/il/almog-eilat.html',
   },
   {
     id: 28,
@@ -302,7 +302,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 1720,
     description: 'וילה מפנקת עם נוף להר חרמון. בריכה מחוממת, 4 חדרי שינה, מרפסת ענקית ויין מיקב שכן.',
-    url: 'https://www.airbnb.com/rooms/golan-villa',
+    url: 'https://www.airbnb.com/rooms/17362818',
   },
   {
     id: 31,
@@ -312,7 +312,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 1480,
     description: 'וילה כפרית בין כרמי ענבים וגנים, 40 דקות מתל אביב. גינה ים-תיכונית, בריכה ו-3 חדרי שינה.',
-    url: 'https://www.airbnb.com/rooms/judean-hills-villa',
+    url: 'https://www.airbnb.com/judean-foothills-israel/stays/villas',
   },
 
   // ── INVALID — silently dropped by the agent ───────────────────────────────
