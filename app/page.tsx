@@ -24,41 +24,29 @@ const {
   rejectionReasons,
 } = filterDeals(RAW_DEALS);
 
-// ─── Per-category tokens ──────────────────────────────────────────────────────
-const CAT_BAR: Record<Category, string> = {
-  vacation:  'bg-sky-500',
-  suite:     'bg-purple-500',
-  penthouse: 'bg-amber-400',
-  villa:     'bg-emerald-500',
-};
-const CAT_BTN: Record<Category, string> = {
-  vacation:  'bg-sky-500 hover:bg-sky-400',
-  suite:     'bg-purple-500 hover:bg-purple-400',
-  penthouse: 'bg-amber-500 hover:bg-amber-400',
-  villa:     'bg-emerald-500 hover:bg-emerald-400',
-};
-const CAT_PRICE_TEXT: Record<Category, string> = {
-  vacation:  'text-sky-400',
-  suite:     'text-purple-400',
-  penthouse: 'text-amber-300',
-  villa:     'text-emerald-400',
+// ─── Per-category design tokens ───────────────────────────────────────────────
+const CAT_PRICE: Record<Category, string> = {
+  vacation:  'text-sky-600',
+  suite:     'text-purple-600',
+  penthouse: 'text-amber-600',
+  villa:     'text-emerald-600',
 };
 const CAT_RING: Record<Category, string> = {
-  vacation:  'hover:ring-sky-200',
-  suite:     'hover:ring-purple-200',
-  penthouse: 'hover:ring-amber-200',
-  villa:     'hover:ring-emerald-200',
+  vacation:  'sm:hover:ring-sky-200',
+  suite:     'sm:hover:ring-purple-200',
+  penthouse: 'sm:hover:ring-amber-200',
+  villa:     'sm:hover:ring-emerald-200',
 };
 
 // ─── Filter tabs ──────────────────────────────────────────────────────────────
 const FILTER_TABS: Array<{
   id: string; label: string; emoji: string; category: Category | null;
 }> = [
-  { id: 'all',       label: 'הכל',    emoji: '✨', category: null },
-  { id: 'vacation',  label: 'חופשה',  emoji: '🏨', category: 'vacation' },
-  { id: 'suite',     label: 'סוויטה', emoji: '🛏️', category: 'suite' },
-  { id: 'penthouse', label: 'פנטהאוז',emoji: '🌆', category: 'penthouse' },
-  { id: 'villa',     label: 'וילה',   emoji: '🏡', category: 'villa' },
+  { id: 'all',       label: 'הכל',     emoji: '✨', category: null },
+  { id: 'vacation',  label: 'חופשה',   emoji: '🏨', category: 'vacation' },
+  { id: 'suite',     label: 'סוויטה',  emoji: '🛏️', category: 'suite' },
+  { id: 'penthouse', label: 'פנטהאוז', emoji: '🌆', category: 'penthouse' },
+  { id: 'villa',     label: 'וילה',    emoji: '🏡', category: 'villa' },
 ];
 
 const FALLBACK_IMG = LOCATION_IMAGE_MAP['default'];
@@ -79,28 +67,26 @@ export default function Home() {
     <main className="min-h-screen bg-gray-50">
 
       {/* ══════════════════════════════════════════════════ STICKY APP BAR */}
-      {/* Single sticky block: compact app bar + filter tabs. ~88px total.  */}
-      {/* Deals start immediately below — nothing pushes them below the fold. */}
       <div className="sticky top-0 z-30 bg-white/95 shadow-sm backdrop-blur-md">
 
         {/* ── App Bar ─────────────────────────────────────────────────────── */}
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-5">
 
-          {/* Left: dismissible AI badge — the only stats surface */}
+          {/* Left: dismissible AI badge */}
           <button
             onClick={() => setShowRejected((v) => !v)}
-            className="flex min-h-[36px] items-center gap-1.5 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600 transition-colors hover:bg-indigo-100 active:scale-95"
+            className="flex min-h-[36px] items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3.5 py-1 text-xs font-semibold text-indigo-600 transition-all duration-150 hover:bg-indigo-100 active:scale-95"
             title="הצג/הסתר דילים שנפסלו"
           >
-            <span className="relative flex h-1.5 w-1.5">
+            <span className="relative flex h-1.5 w-1.5 shrink-0">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
             </span>
-            ✨ AI · {validDeals.length} דילים
+            <span>✨ AI · {validDeals.length} דילים</span>
             <span className="opacity-40">{showRejected ? '▲' : '▼'}</span>
           </button>
 
-          {/* Right: Logo — the brand anchor */}
+          {/* Right: Logo */}
           <div className="flex items-center gap-2">
             <span className="text-lg font-black tracking-tight text-gray-900">
               צייד הדילים
@@ -109,9 +95,9 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ── Rejection panel (dismissible, behind the badge) ─────────────── */}
+        {/* ── Rejection panel ──────────────────────────────────────────────── */}
         {showRejected && (
-          <div className="border-t border-gray-100 bg-slate-50 px-4 py-3">
+          <div className="border-t border-gray-100 bg-slate-50 px-5 py-3">
             <div className="mx-auto max-w-5xl">
               <div className="mb-2 flex flex-wrap items-center gap-2">
                 <span className="text-xs font-bold text-red-600">
@@ -153,10 +139,10 @@ export default function Home() {
           </div>
         )}
 
-        {/* ── Filter tabs — sticky & horizontally scrollable ──────────────── */}
+        {/* ── Filter tabs ──────────────────────────────────────────────────── */}
         <div className="border-t border-gray-100">
           <div className="mx-auto max-w-5xl">
-            <div className="scrollbar-hide flex gap-2 overflow-x-auto px-4 py-2.5">
+            <div className="scrollbar-hide flex gap-2 overflow-x-auto px-5 py-2.5">
               {FILTER_TABS.map((tab) => {
                 const count =
                   tab.category === null
@@ -167,16 +153,16 @@ export default function Home() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveFilter(tab.id)}
-                    className={`flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 active:scale-95 ${
+                    className={`flex min-h-[38px] shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-150 active:scale-95 ${
                       isActive
                         ? 'bg-gray-900 text-white shadow-md'
-                        : 'border border-gray-200 bg-white text-gray-600 hover:border-gray-400 hover:bg-gray-50'
+                        : 'border border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
                     <span className="leading-none">{tab.emoji}</span>
                     <span>{tab.label}</span>
                     <span
-                      className={`rounded-full px-1.5 py-0.5 text-xs font-bold ${
+                      className={`rounded-full px-1.5 py-0.5 text-xs font-bold leading-none ${
                         isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'
                       }`}
                     >
@@ -191,8 +177,6 @@ export default function Home() {
       </div>
 
       {/* ══════════════════════════════════════════════════════ DEAL GRID */}
-      {/* No padding on mobile → cards bleed edge-to-edge.                  */}
-      {/* sm+ → standard padding and 2/3-col grid.                          */}
       <div className="mx-auto max-w-5xl">
         {filteredDeals.length === 0 ? (
           <div className="flex flex-col items-center py-28 text-center">
@@ -226,7 +210,7 @@ export default function Home() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DEAL CARD  — image-forward, price lives on the photo
+// DEAL CARD  — clean photo + structured white body
 // ─────────────────────────────────────────────────────────────────────────────
 function DealCard({ deal }: { deal: Deal }) {
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -235,18 +219,16 @@ function DealCard({ deal }: { deal: Deal }) {
   const limit      = BUDGET_LIMITS[deal.category];
   const savings    = limit - deal.price_per_night_ils;
   const savingsPct = Math.round((savings / limit) * 100);
-  const fillPct    = Math.round((deal.price_per_night_ils / limit) * 100);
 
   return (
     <article
-      className={`group overflow-hidden bg-white shadow-md ring-1 ring-gray-100 transition-all duration-300
-        sm:rounded-2xl sm:hover:-translate-y-1.5 sm:hover:shadow-xl sm:hover:ring-2
+      className={`group overflow-hidden bg-white shadow-sm ring-1 ring-gray-100 transition-all duration-300
+        sm:rounded-2xl sm:hover:-translate-y-1 sm:hover:shadow-xl sm:hover:ring-2
         ${CAT_RING[deal.category]}`}
     >
-      {/* ── Photo — carries price, name, location, badges ─────────────────── */}
-      {/* aspect-[3/2] → ~250px tall on 375px screen. 2+ cards visible below  */}
-      {/* the ~90px sticky header on a standard phone.                         */}
-      <div className="relative aspect-[3/2] overflow-hidden bg-gray-200">
+
+      {/* ── Photo — badges only, no text overlaid ──────────────────────────── */}
+      <div className="relative aspect-[4/3] overflow-hidden rounded-t-2xl bg-gray-100">
 
         {/* Skeleton shimmer */}
         {!imgLoaded && <div className="absolute inset-0 skeleton" />}
@@ -266,15 +248,15 @@ function DealCard({ deal }: { deal: Deal }) {
           }}
         />
 
-        {/* Dark vignette: transparent at top, heavy at bottom */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
-
         {/* Category accent bar */}
         <div className={`absolute inset-x-0 top-0 h-[3px] ${CATEGORY_ACCENT[deal.category]}`} />
 
-        {/* ── Top badges ── */}
+        {/* Badges — the only occupants of the photo */}
+        {/* RTL: first child → right side, second child → left side */}
         <div className="absolute inset-x-0 top-3 flex items-center justify-between px-3">
-          <span className={`rounded-full px-2.5 py-1 text-xs font-bold shadow-sm ${CATEGORY_COLORS[deal.category]}`}>
+          <span
+            className={`rounded-full px-2.5 py-1 text-xs font-bold shadow-sm backdrop-blur-sm ${CATEGORY_COLORS[deal.category]}`}
+          >
             {CATEGORY_LABELS[deal.category]}
           </span>
           {savingsPct > 0 && (
@@ -283,61 +265,80 @@ function DealCard({ deal }: { deal: Deal }) {
             </span>
           )}
         </div>
-
-        {/* ── Bottom overlay: name + price + location ── */}
-        <div className="absolute inset-x-0 bottom-0 p-4">
-          <h2 className="mb-2 line-clamp-1 text-base font-black leading-tight text-white drop-shadow">
-            {deal.property_name}
-          </h2>
-          <div className="flex items-end justify-between gap-2">
-            {/* Price — the visual anchor */}
-            <div className="flex items-baseline gap-1">
-              <span className={`text-3xl font-black leading-none drop-shadow ${CAT_PRICE_TEXT[deal.category]}`}>
-                {deal.price_per_night_ils.toLocaleString('he-IL')} ₪
-              </span>
-              <span className="text-xs text-white/60">ללילה</span>
-            </div>
-            {/* Location + budget reference */}
-            <div className="text-right">
-              <div className="flex items-center justify-end gap-1 text-sm font-semibold text-white/90 drop-shadow">
-                <span>{deal.location}</span>
-                <span>📍</span>
-              </div>
-              <div className="mt-0.5 text-xs text-white/45">
-                מגבלה {limit.toLocaleString('he-IL')} ₪
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* ── Card body ─────────────────────────────────────────────────────── */}
-      <div className="p-4">
+      {/* ── White card body ────────────────────────────────────────────────── */}
+      <div className="px-4 pb-4 pt-3">
 
-        {/* Description — hidden on mobile to save vertical space */}
-        <p className="mb-3 hidden line-clamp-2 text-sm leading-relaxed text-gray-500 sm:block">
+        {/* Row 1 — Property name */}
+        <h2 className="mb-1 line-clamp-1 text-[15px] font-bold leading-snug text-gray-900">
+          {deal.property_name}
+        </h2>
+
+        {/* Row 2 — Location */}
+        <div className="mb-2.5 flex items-center gap-1 text-sm text-gray-500">
+          {/* Map pin icon */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="h-3.5 w-3.5 shrink-0 text-gray-400"
+          >
+            <path
+              fillRule="evenodd"
+              d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <span className="line-clamp-1">{deal.location}</span>
+        </div>
+
+        {/* Row 3 — Description */}
+        <p className="mb-3 line-clamp-2 text-sm leading-relaxed text-gray-500">
           {deal.description}
         </p>
 
-        {/* Budget progress bar — hidden on mobile, shown sm+ for CRO on desktop */}
-        <div className="mb-3 hidden sm:block">
-          <div className="h-1 w-full overflow-hidden rounded-full bg-gray-100">
-            <div
-              className={`h-full rounded-full ${CAT_BAR[deal.category]}`}
-              style={{ width: `${fillPct}%` }}
-            />
-          </div>
-        </div>
+        {/* Row 4 — Bottom action bar: price left ↔ CTA right (in RTL: price right ↔ CTA left) */}
+        <div className="flex items-center justify-between gap-3 border-t border-gray-100 pt-3">
 
-        {/* CTA — full-width, 44px+, category colour */}
-        <a
-          href={deal.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`flex min-h-[44px] w-full items-center justify-center rounded-xl text-sm font-black text-white shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98] active:shadow-none ${CAT_BTN[deal.category]}`}
-        >
-          להזמנה ↗
-        </a>
+          {/* Price block — right side in RTL (first in HTML) */}
+          <div>
+            <div className="flex items-baseline gap-1">
+              <span className={`text-xl font-black ${CAT_PRICE[deal.category]}`}>
+                {deal.price_per_night_ils.toLocaleString('he-IL')} ₪
+              </span>
+              <span className="text-xs text-gray-400">/ לילה</span>
+            </div>
+            <p className="mt-0.5 text-xs text-gray-400 line-through decoration-gray-300">
+              מגבלה {limit.toLocaleString('he-IL')} ₪
+            </p>
+          </div>
+
+          {/* CTA — left side in RTL (second in HTML) */}
+          <a
+            href={deal.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-xl bg-slate-900 px-5 py-2 text-sm font-bold text-white shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:bg-slate-700 hover:shadow-md active:scale-[0.97] active:shadow-none"
+          >
+            להזמנה
+            {/* External link icon */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2.5}
+              stroke="currentColor"
+              className="h-3.5 w-3.5 opacity-70"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+              />
+            </svg>
+          </a>
+        </div>
       </div>
     </article>
   );
