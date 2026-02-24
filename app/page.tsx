@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import {
   filterDeals,
   RAW_DEALS,
@@ -229,12 +230,12 @@ export default function Home() {
 // ─────────────────────────────────────────────────────────────────────────────
 function DealCard({ deal }: { deal: Deal }) {
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgSrc, setImgSrc] = useState(() => getLocationImage(deal.location));
 
   const limit      = BUDGET_LIMITS[deal.category];
   const savings    = limit - deal.price_per_night_ils;
   const savingsPct = Math.round((savings / limit) * 100);
   const fillPct    = Math.round((deal.price_per_night_ils / limit) * 100);
-  const imgUrl     = getLocationImage(deal.location);
 
   return (
     <article
@@ -250,16 +251,17 @@ function DealCard({ deal }: { deal: Deal }) {
         {/* Skeleton shimmer */}
         {!imgLoaded && <div className="absolute inset-0 skeleton" />}
 
-        <img
-          src={imgUrl}
+        <Image
+          src={imgSrc}
           alt={deal.location}
-          className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105 ${
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className={`object-cover transition-all duration-500 group-hover:scale-105 ${
             imgLoaded ? 'opacity-100' : 'opacity-0'
           }`}
-          loading="lazy"
           onLoad={() => setImgLoaded(true)}
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = FALLBACK_IMG;
+          onError={() => {
+            if (imgSrc !== FALLBACK_IMG) setImgSrc(FALLBACK_IMG);
             setImgLoaded(true);
           }}
         />
