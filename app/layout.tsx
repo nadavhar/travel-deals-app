@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { Heebo } from 'next/font/google';
+import { Rubik } from 'next/font/google';
 import './globals.css';
 
-const heebo = Heebo({
+const rubik = Rubik({
   subsets: ['hebrew', 'latin'],
   weight: ['300', '400', '500', '600', '700', '800', '900'],
   display: 'swap',
@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="he" dir="rtl">
-      <body className={`${heebo.className} antialiased bg-slate-50`}>{children}</body>
+      <body className={`${rubik.className} antialiased bg-gray-50`}>{children}</body>
     </html>
   );
 }
