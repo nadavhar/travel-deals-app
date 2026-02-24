@@ -68,6 +68,12 @@ export const LOCATION_IMAGE_MAP: Record<string, string> = {
   'אשדוד':        `${WM}/6/69/Sarona_CBD_01_%28cropped%29.jpg/1200px-Sarona_CBD_01_%28cropped%29.jpg`,
   /** Netanya — Mediterranean coast */
   'נתניה':        `${WM}/6/69/Sarona_CBD_01_%28cropped%29.jpg/1200px-Sarona_CBD_01_%28cropped%29.jpg`,
+  /** Akko (Acre) — ancient port city aerial */
+  'עכו':          `${WM}/a/a3/ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg/1200px-ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg`,
+  /** Zichron Ya'akov — Carmel wine region */
+  'זיכרון יעקב': `${WM}/d/dd/The_Hanging_Gardens_of_Haifa%2C_Israel_%2850099173503%29_%28cropped%29.jpg/1200px-The_Hanging_Gardens_of_Haifa%2C_Israel_%2850099173503%29_%28cropped%29.jpg`,
+  /** Arava — southern Negev desert */
+  'ערבה':         `${WM}/d/d2/NahalHavarimNov212022_03.jpg/1200px-NahalHavarimNov212022_03.jpg`,
 
   // ── Broad regions (MUST come after specific city keys) ────────────────────
 
