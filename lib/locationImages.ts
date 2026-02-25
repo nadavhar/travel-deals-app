@@ -30,11 +30,34 @@ const JERUSALEM_POOL = [
   `${WMF}/3/38/Jerusalem_panorama_view_from_Mt._Scopus.jpg`,
 ];
 
+const HAIFA_POOL = [
+  `${WMF}/c/cf/Bahai_Gardens_P1020953.JPG`,
+  `${WMF}/4/4b/Haifa_Bay.JPG`,
+  `${WMF}/f/f5/ISRAEL%2C_Haifa%2C_Gradinile_Bahai_%28vedere_spre_Marea_Mediterana%29.JPG`,
+];
+
+const CAESAREA_POOL = [
+  `${WMF}/7/77/Ancient_Roman_aqueduct_in_Caesarea_Maritima_DSC05187.JPG`,
+  `${WMF}/6/6f/Caesarea_Maritima_BW_2010-09-23_09-54-00.JPG`,
+  `${WMF}/5/57/Caesarea_maritima_BW_10.JPG`,
+];
+
+const HERZLIYA_POOL = [
+  `${WM}/a/a3/ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg/1200px-ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg`,
+  `${WMF}/7/77/Ancient_Roman_aqueduct_in_Caesarea_Maritima_DSC05187.JPG`,
+  `${WM}/6/69/Sarona_CBD_01_%28cropped%29.jpg/1200px-Sarona_CBD_01_%28cropped%29.jpg`,
+];
+
+const GOLAN_POOL = [
+  `${WMF}/e/e7/Mount_Hermonit_in_Golan_Heights.JPG`,
+  `${WMF}/4/43/Golan_Heights_5.JPG`,
+  `${WMF}/f/f4/Golan_Heights_6.JPG`,
+  `${WMF}/2/29/Yonatan_Golan_Heights.JPG`,
+];
+
 const NORTH_POOL = [
   `${WM}/f/f7/Kinneret_cropped.jpg/1200px-Kinneret_cropped.jpg`,
   `${WM}/9/9a/Banias_-_Temple_of_Pan_001.jpg/1200px-Banias_-_Temple_of_Pan_001.jpg`,
-  `${WM}/a/a9/Caesarea.JPG/1200px-Caesarea.JPG`,
-  `${WM}/d/dd/The_Hanging_Gardens_of_Haifa%2C_Israel_%2850099173503%29_%28cropped%29.jpg/1200px-The_Hanging_Gardens_of_Haifa%2C_Israel_%2850099173503%29_%28cropped%29.jpg`,
   `${WM}/3/3e/Nazareth_Panorama_Dafna_Tal_IMOT_%2814532097313%29.jpg/1200px-Nazareth_Panorama_Dafna_Tal_IMOT_%2814532097313%29.jpg`,
 ];
 
@@ -57,9 +80,9 @@ export const LOCATION_IMAGE_MAP: Record<string, string[]> = {
   'ים המלח':     DEAD_SEA_POOL,
   'עין גדי':     DEAD_SEA_POOL,
   'מצפה רמון':   DEFAULT_POOL,
-  'רמת הגולן':   NORTH_POOL,
+  'רמת הגולן':   GOLAN_POOL,
   'גליל עליון':  NORTH_POOL,
-  'חוף הכרמל':   NORTH_POOL,
+  'חוף הכרמל':   CAESAREA_POOL,
   'עמק הירדן':   NORTH_POOL,
   'שפלת יהודה':  DEFAULT_POOL,
 
@@ -68,13 +91,13 @@ export const LOCATION_IMAGE_MAP: Record<string, string[]> = {
   'אילת':         EILAT_POOL,
   'ירושלים':      JERUSALEM_POOL,
   'תל אביב':      TEL_AVIV_POOL,
-  'חיפה':         NORTH_POOL,
+  'חיפה':         HAIFA_POOL,
   'טבריה':        NORTH_POOL,
   'כנרת':         NORTH_POOL,
   'נצרת':         NORTH_POOL,
-  'קיסריה':       NORTH_POOL,
-  'הרצליה':       TEL_AVIV_POOL,
-  'נחשולים':      NORTH_POOL,
+  'קיסריה':       CAESAREA_POOL,
+  'הרצליה':       HERZLIYA_POOL,
+  'נחשולים':      CAESAREA_POOL,
   'ערד':          DEFAULT_POOL,
   'צפת':          NORTH_POOL,
   'ראש פינה':     NORTH_POOL,
@@ -87,10 +110,10 @@ export const LOCATION_IMAGE_MAP: Record<string, string[]> = {
   'ערבה':         DEFAULT_POOL,
 
   // Broad regions
-  'גולן':         NORTH_POOL,
+  'גולן':         GOLAN_POOL,
   'גליל':         NORTH_POOL,
   'נגב':          DEFAULT_POOL,
-  'כרמל':         NORTH_POOL,
+  'כרמל':         HAIFA_POOL,
   'צפון':         NORTH_POOL,
   'דרום':         DEFAULT_POOL,
   'מרכז':         TEL_AVIV_POOL,
