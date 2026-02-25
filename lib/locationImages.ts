@@ -37,9 +37,9 @@ const HAIFA_POOL = [
 ];
 
 const CAESAREA_POOL = [
-  `${WMF}/7/77/Ancient_Roman_aqueduct_in_Caesarea_Maritima_DSC05187.JPG`,
-  `${WMF}/6/6f/Caesarea_Maritima_BW_2010-09-23_09-54-00.JPG`,
-  `${WMF}/5/57/Caesarea_maritima_BW_10.JPG`,
+  `${WMF}/f/fc/Mediterranean_Sea_panorama.jpg`,
+  `${WMF}/2/25/PikiWiki_Israel_3723_Newe_Yam_Atlit_Bay.JPG`,
+  `${WMF}/8/8f/PikiWiki_Israel_3387_Shoreline.JPG`,
 ];
 
 const NETANYA_POOL = [
@@ -50,10 +50,10 @@ const NETANYA_POOL = [
 ];
 
 const ZICHRON_POOL = [
-  `${WMF}/5/52/126263_zichron_yaakov_PikiWiki_Israel.jpg`,
-  `${WMF}/0/04/Zichron_Yaakov_%288090007187%29.jpg`,
-  `${WMF}/e/eb/Zichron_Yaakov_%288090007555%29.jpg`,
-  `${WMF}/e/e4/Zichron_Yaakov%2C_Israel_35.jpg`,
+  `${WMF}/b/b2/PikiWiki_Israel_1734_Zichron_Yaakov_%D7%92%D7%A4%D7%9F.jpg`,
+  `${WMF}/5/59/Autumn_vineyard_%2830064280301%29.jpg`,
+  `${WMF}/8/8b/PikiWiki_Israel_12979_Organic_grape_in_the_Golan_Heights.JPG`,
+  `${WMF}/7/7a/PikiWiki_Israel_12980_Organic_Vineyard_in_the_Golan_Heights.JPG`,
 ];
 
 const HERZLIYA_POOL = [
@@ -63,10 +63,11 @@ const HERZLIYA_POOL = [
 ];
 
 const GOLAN_POOL = [
-  `${WMF}/e/e7/Mount_Hermonit_in_Golan_Heights.JPG`,
   `${WMF}/4/43/Golan_Heights_5.JPG`,
   `${WMF}/f/f4/Golan_Heights_6.JPG`,
-  `${WMF}/2/29/Yonatan_Golan_Heights.JPG`,
+  `${WMF}/6/62/140201-154326_February_2014_in_the_Golan_Heights.jpg`,
+  `${WMF}/d/db/A_VIEW_OF_THE_GALILEE_WITH_MOUNT_HERMON_IN_THE_BACKGROUND._%D7%A0%D7%95%D7%A3_%D7%A9%D7%9C_%D7%94%D7%92%D7%9C%D7%99%D7%9C._%D7%91%D7%A8%D7%A7%D7%A2%2C_%D7%94%D7%A8_%D7%97%D7%A8%D7%9E%D7%95%D7%9F.D20-044.jpg`,
+  `${WMF}/b/b6/Clouds_Of_Mount_Hermon.jpg`,
 ];
 
 const NORTH_POOL = [
