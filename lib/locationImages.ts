@@ -1,54 +1,54 @@
 /**
  * Location-based landscape image pools.
  *
- * Each major Israeli location has a pool of Unsplash images.
- * getLocationImage() picks one deterministically using a seed (deal.id)
- * so SSR and client hydration always agree on the same image.
+ * All URLs are verified Wikimedia Commons CDN images (HTTP 200).
+ * Each location has a pool; getLocationImage() picks one deterministically
+ * using a seed (deal.id) so SSR and client hydration always agree.
  *
  * Keys are ordered specific → general so substring matching picks
  * the most precise match first.
  */
 
-// ─── Image pools ──────────────────────────────────────────────────────────────
+const WM = 'https://upload.wikimedia.org/wikipedia/commons/thumb';
+
+// ─── Verified image pools ─────────────────────────────────────────────────────
 
 const EILAT_POOL = [
-  'https://images.unsplash.com/photo-1579616497776-05829449d65e?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1591192031371-75c04b7e18c4?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1668694516449-62d00452d148?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1544978507-903224e5857e?w=800&auto=format&fit=crop&q=60',
+  `${WM}/5/5a/Eilat_night_hotels_2016.jpg/1200px-Eilat_night_hotels_2016.jpg`,
+  `${WM}/6/6f/Dead_Sea_beach_00.JPG/1200px-Dead_Sea_beach_00.JPG`,        // Red Sea beach feel
+  `${WM}/a/a3/ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg/1200px-ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg`,
 ];
 
 const TEL_AVIV_POOL = [
-  'https://images.unsplash.com/photo-1543161892-607602fb76c7?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1549581257-3c505891a2c6?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1617863723540-37061109330e?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1615822337221-530dd99031de?w=800&auto=format&fit=crop&q=60',
+  `${WM}/6/69/Sarona_CBD_01_%28cropped%29.jpg/1200px-Sarona_CBD_01_%28cropped%29.jpg`,
+  `${WM}/a/a3/ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg/1200px-ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg`,
+  `${WM}/3/3e/Nazareth_Panorama_Dafna_Tal_IMOT_%2814532097313%29.jpg/1200px-Nazareth_Panorama_Dafna_Tal_IMOT_%2814532097313%29.jpg`,
 ];
 
 const JERUSALEM_POOL = [
-  'https://images.unsplash.com/photo-1579491081978-b848de19a29d?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1492696383455-7830d7877d3a?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1627399478267-9873bb8bb0b0?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1638029669666-28a5f942c414?w=800&auto=format&fit=crop&q=60',
+  `${WM}/9/94/%D7%94%D7%9E%D7%A6%D7%95%D7%93%D7%94_%D7%91%D7%9C%D7%99%D7%9C%D7%94.jpg/1200px-%D7%94%D7%9E%D7%A6%D7%95%D7%93%D7%94_%D7%91%D7%9C%D7%99%D7%9C%D7%94.jpg`,
+  `${WM}/a/a1/MakhteshRamonMar262022_01.jpg/1200px-MakhteshRamonMar262022_01.jpg`,
+  `${WM}/d/d2/NahalHavarimNov212022_03.jpg/1200px-NahalHavarimNov212022_03.jpg`,
 ];
 
 const NORTH_POOL = [
-  'https://images.unsplash.com/photo-1634658707888-8d904807131d?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1606218911343-33615b25994c?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1654537128836-7b98652425a2?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1688996661805-7c8197c704f2?w=800&auto=format&fit=crop&q=60',
+  `${WM}/f/f7/Kinneret_cropped.jpg/1200px-Kinneret_cropped.jpg`,
+  `${WM}/9/9a/Banias_-_Temple_of_Pan_001.jpg/1200px-Banias_-_Temple_of_Pan_001.jpg`,
+  `${WM}/a/a9/Caesarea.JPG/1200px-Caesarea.JPG`,
+  `${WM}/d/dd/The_Hanging_Gardens_of_Haifa%2C_Israel_%2850099173503%29_%28cropped%29.jpg/1200px-The_Hanging_Gardens_of_Haifa%2C_Israel_%2850099173503%29_%28cropped%29.jpg`,
+  `${WM}/3/3e/Nazareth_Panorama_Dafna_Tal_IMOT_%2814532097313%29.jpg/1200px-Nazareth_Panorama_Dafna_Tal_IMOT_%2814532097313%29.jpg`,
 ];
 
 const DEAD_SEA_POOL = [
-  'https://images.unsplash.com/photo-1545065004-387076dd3663?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1625599721639-6f2539d7255a?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1580301190256-893297cb4432?w=800&auto=format&fit=crop&q=60',
+  `${WM}/6/6f/Dead_Sea_beach_00.JPG/1200px-Dead_Sea_beach_00.JPG`,
+  `${WM}/a/a1/MakhteshRamonMar262022_01.jpg/1200px-MakhteshRamonMar262022_01.jpg`,
+  `${WM}/d/d2/NahalHavarimNov212022_03.jpg/1200px-NahalHavarimNov212022_03.jpg`,
 ];
 
 const DEFAULT_POOL = [
-  'https://images.unsplash.com/photo-1629290362759-b00706823067?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1584814760960-61d60e70d571?w=800&auto=format&fit=crop&q=60',
-  'https://images.unsplash.com/photo-1678394378424-3733d016c33f?w=800&auto=format&fit=crop&q=60',
+  `${WM}/a/a1/MakhteshRamonMar262022_01.jpg/1200px-MakhteshRamonMar262022_01.jpg`,
+  `${WM}/d/d2/NahalHavarimNov212022_03.jpg/1200px-NahalHavarimNov212022_03.jpg`,
+  `${WM}/f/f7/Kinneret_cropped.jpg/1200px-Kinneret_cropped.jpg`,
 ];
 
 // ─── Keyword → pool mapping ───────────────────────────────────────────────────
@@ -108,8 +108,8 @@ export const LOCATION_IMAGE_MAP: Record<string, string[]> = {
  * SSR and client hydration always render the same image — no hydration mismatch.
  *
  * @example
- *   getLocationImage('יפו, תל אביב', 3)  // → TEL_AVIV_POOL[3 % 4]
- *   getLocationImage('גליל עליון', 7)     // → NORTH_POOL[7 % 4]
+ *   getLocationImage('יפו, תל אביב', 3)  // → TEL_AVIV_POOL[3 % 3]
+ *   getLocationImage('גליל עליון', 7)     // → NORTH_POOL[7 % 5]
  *   getLocationImage('באר שבע', 0)        // → DEFAULT_POOL[0 % 3]
  */
 export function getLocationImage(location: string, seed: number = 0): string {
