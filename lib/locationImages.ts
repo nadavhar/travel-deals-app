@@ -56,6 +56,31 @@ const ZICHRON_POOL = [
   `${WMF}/7/7a/PikiWiki_Israel_12980_Organic_Vineyard_in_the_Golan_Heights.JPG`,
 ];
 
+const ROSH_HANIKRA_POOL = [
+  `${WMF}/2/23/ROSH_HANIKRA_RH3_ITAMAR_GRINBERG_IMOT_%2814301597350%29.jpg`,
+  `${WMF}/e/e8/Rosh-ha-Nikra.jpg`,
+  `${WMF}/c/c0/RoshHanikra01_ST_07.JPG`,
+  `${WMF}/d/d9/Rosh_Haniqra_WV_banner.jpg`,
+];
+
+const AKKO_POOL = [
+  `${WMF}/e/e1/Akko_from_far.jpg`,
+  `${WMF}/1/1d/Akko_Bay_and_Pisan_Harbor_1149_%28509700145%29.jpg`,
+  `${WMF}/3/3c/Atlit_and_Haifa_bay_aerial.jpg`,
+];
+
+const ASHKELON_POOL = [
+  `${WMF}/8/8d/92286_bar_kochba_beach_PikiWiki_Israel.jpg`,
+  `${WMF}/8/85/92288_ashkelon_beach_breakwaters_PikiWiki_Israel.jpg`,
+  `${WMF}/6/60/Ashkelon_%282935055087%29.jpg`,
+];
+
+const ASHDOD_POOL = [
+  `${WMF}/9/91/102887_ashdod_beach_PikiWiki_Israel.jpg`,
+  `${WMF}/1/14/Ashdod_Beach.jpg`,
+  `${WMF}/3/3a/AshdodBeachLine.jpg`,
+];
+
 const HERZLIYA_POOL = [
   `${WM}/a/a3/ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg/1200px-ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg`,
   `${WMF}/7/77/Ancient_Roman_aqueduct_in_Caesarea_Maritima_DSC05187.JPG`,
@@ -106,6 +131,7 @@ export const LOCATION_IMAGE_MAP: Record<string, string[]> = {
   'רמת הגולן':   GOLAN_POOL,
   'גליל עליון':  NORTH_POOL,
   'חוף הכרמל':   CAESAREA_POOL,
+  'ראש הנקרה':   ROSH_HANIKRA_POOL,
   'גינוסר':      KINNERET_POOL,
   'עמק הירדן':   KINNERET_POOL,
   'שפלת יהודה':  DEFAULT_POOL,
@@ -126,10 +152,10 @@ export const LOCATION_IMAGE_MAP: Record<string, string[]> = {
   'צפת':          NORTH_POOL,
   'ראש פינה':     NORTH_POOL,
   'בת ים':        TEL_AVIV_POOL,
-  'אשקלון':       TEL_AVIV_POOL,
-  'אשדוד':        TEL_AVIV_POOL,
+  'אשקלון':       ASHKELON_POOL,
+  'אשדוד':        ASHDOD_POOL,
   'נתניה':        NETANYA_POOL,
-  'עכו':          NORTH_POOL,
+  'עכו':          AKKO_POOL,
   'זיכרון יעקב': ZICHRON_POOL,
   'ערבה':         DEFAULT_POOL,
 
