@@ -42,6 +42,20 @@ const CAESAREA_POOL = [
   `${WMF}/5/57/Caesarea_maritima_BW_10.JPG`,
 ];
 
+const NETANYA_POOL = [
+  `${WMF}/d/da/Beach_of_Netanya.jpg`,
+  `${WMF}/9/91/Beaches_of_Netanya_P1080866.JPG`,
+  `${WMF}/c/c2/Beaches_of_Netanya_P1080873.JPG`,
+  `${WMF}/b/bd/PikiWiki_Israel_15855_Oved_Ben-Ami_Boulevard_in_Netanya_Beach_Promenade.JPG`,
+];
+
+const ZICHRON_POOL = [
+  `${WMF}/5/52/126263_zichron_yaakov_PikiWiki_Israel.jpg`,
+  `${WMF}/0/04/Zichron_Yaakov_%288090007187%29.jpg`,
+  `${WMF}/e/eb/Zichron_Yaakov_%288090007555%29.jpg`,
+  `${WMF}/e/e4/Zichron_Yaakov%2C_Israel_35.jpg`,
+];
+
 const HERZLIYA_POOL = [
   `${WM}/a/a3/ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg/1200px-ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg`,
   `${WMF}/7/77/Ancient_Roman_aqueduct_in_Caesarea_Maritima_DSC05187.JPG`,
@@ -104,9 +118,9 @@ export const LOCATION_IMAGE_MAP: Record<string, string[]> = {
   'בת ים':        TEL_AVIV_POOL,
   'אשקלון':       TEL_AVIV_POOL,
   'אשדוד':        TEL_AVIV_POOL,
-  'נתניה':        TEL_AVIV_POOL,
+  'נתניה':        NETANYA_POOL,
   'עכו':          NORTH_POOL,
-  'זיכרון יעקב': NORTH_POOL,
+  'זיכרון יעקב': ZICHRON_POOL,
   'ערבה':         DEFAULT_POOL,
 
   // Broad regions
