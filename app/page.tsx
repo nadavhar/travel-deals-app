@@ -104,7 +104,7 @@ const FILTER_TABS: Array<{ id: string; emoji: string; category: Category | null 
   { id: 'villa',     emoji: '🏡', category: 'villa' },
 ];
 
-const FALLBACK_IMG = LOCATION_IMAGE_MAP['default'];
+const FALLBACK_IMG = LOCATION_IMAGE_MAP['default'][0];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PAGE
@@ -256,7 +256,7 @@ function DealCard({
   catLabel: Record<Category, string>;
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [imgSrc, setImgSrc]       = useState(() => getLocationImage(deal.location));
+  const [imgSrc, setImgSrc]       = useState(() => getLocationImage(deal.location, deal.id));
 
   const description   = t.lang === 'EN' && deal.description_en   ? deal.description_en   : deal.description;
   const propertyName  = t.lang === 'EN' && deal.property_name_en ? deal.property_name_en : deal.property_name;
