@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { Compass } from 'lucide-react';
 import {
   filterDeals,
   RAW_DEALS,
@@ -150,16 +151,13 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════ STICKY HEADER */}
       <div className="sticky top-0 z-50 bg-white shadow-sm">
 
-        {/* ── Premium top accent bar ───────────────────────────────────────── */}
-        <div className="h-[3px] bg-gradient-to-r from-sky-400 via-purple-400 via-60% to-emerald-400" />
+        {/* ── Centered logo + subtitle ─────────────────────────────────────── */}
+        <div className="relative px-4 pb-5 pt-6 text-center">
 
-        {/* ── App Bar ─────────────────────────────────────────────────────── */}
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-
-          {/* Left: language switcher */}
+          {/* Language switcher — absolute, RTL-aware: sits on the left */}
           <button
             onClick={() => setLang((l) => (l === 'HE' ? 'EN' : 'HE'))}
-            className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-gray-500 transition-colors duration-150 hover:bg-gray-100 active:bg-gray-200"
+            className="absolute left-4 top-5 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-gray-500 transition-colors duration-150 hover:bg-gray-100 active:bg-gray-200"
             aria-label="Switch language"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
@@ -168,19 +166,28 @@ export default function Home() {
             <span>{t.switchLang}</span>
           </button>
 
-          {/* Right: Logo */}
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-black tracking-tighter text-slate-900">
+          {/* Logo: text + compass icon (RTL: icon to the right of text) */}
+          <div className="flex items-center justify-center gap-2.5" dir="rtl">
+            <span className="text-2xl font-black tracking-tight text-slate-800">
               {t.appName}
             </span>
-            <span className="text-2xl leading-none">🏖️</span>
+            <Compass className="h-7 w-7 shrink-0 text-orange-600" strokeWidth={1.5} />
           </div>
+
+          {/* Subtitle */}
+          <p className="mt-1.5 text-[13px] font-normal text-gray-500">
+            חופשה בתקציב שלך – הדילים הכי שווים בישראל
+          </p>
         </div>
 
-        {/* ── Filter tabs ──────────────────────────────────────────────────── */}
-        <div className="border-t border-gray-100">
-          <div className="mx-auto max-w-5xl">
-            <div className="scrollbar-hide flex gap-2 overflow-x-auto px-4 py-2.5">
+        {/* ── Divider ──────────────────────────────────────────────────────── */}
+        <div className="border-b border-gray-200" />
+
+        {/* ── Filter pills ─────────────────────────────────────────────────── */}
+        <div className="mx-auto max-w-5xl">
+          <div className="flex justify-center overflow-x-auto px-4 py-3 [&::-webkit-scrollbar]:hidden"
+               style={{ scrollbarWidth: 'none' }}>
+            <div className="flex gap-3">
               {FILTER_TABS.map((tab) => {
                 const count =
                   tab.category === null
@@ -191,16 +198,16 @@ export default function Home() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveFilter(tab.id)}
-                    className={`flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold shadow-sm transition-all duration-200 active:scale-95 ${
+                    className={`flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 active:scale-95 ${
                       isActive
-                        ? `${TAB_ACTIVE[tab.id]} text-white shadow-md`
-                        : 'border border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50 shadow-none'
+                        ? 'bg-orange-600 text-white shadow-md shadow-orange-600/20'
+                        : 'border border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
                     <span className="leading-none">{tab.emoji}</span>
                     <span>{tabLabel[tab.id]}</span>
                     <span className={`rounded-full px-1.5 py-0.5 text-xs font-bold leading-none ${
-                      isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'
+                      isActive ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-500'
                     }`}>
                       {count}
                     </span>
