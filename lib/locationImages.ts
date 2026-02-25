@@ -70,10 +70,18 @@ const GOLAN_POOL = [
   `${WMF}/b/b6/Clouds_Of_Mount_Hermon.jpg`,
 ];
 
-const NORTH_POOL = [
+const KINNERET_POOL = [
   `${WM}/f/f7/Kinneret_cropped.jpg/1200px-Kinneret_cropped.jpg`,
+  `${WMF}/7/74/117291_the_kinneret_area_PikiWiki_Israel.jpg`,
+  `${WMF}/8/8e/141151_sea_of_galilee_PikiWiki_Israel.jpg`,
+  `${WMF}/d/d3/20161020_174813_October_2016_in_Israel.jpg`,
+  `${WMF}/b/b8/A_fishing_boat_on_Lake_Kinneret_%28FL45731763%29.jpg`,
+];
+
+const NORTH_POOL = [
   `${WM}/9/9a/Banias_-_Temple_of_Pan_001.jpg/1200px-Banias_-_Temple_of_Pan_001.jpg`,
   `${WM}/3/3e/Nazareth_Panorama_Dafna_Tal_IMOT_%2814532097313%29.jpg/1200px-Nazareth_Panorama_Dafna_Tal_IMOT_%2814532097313%29.jpg`,
+  `${WMF}/4/43/Golan_Heights_5.JPG`,
 ];
 
 const DEAD_SEA_POOL = [
@@ -98,7 +106,8 @@ export const LOCATION_IMAGE_MAP: Record<string, string[]> = {
   'רמת הגולן':   GOLAN_POOL,
   'גליל עליון':  NORTH_POOL,
   'חוף הכרמל':   CAESAREA_POOL,
-  'עמק הירדן':   NORTH_POOL,
+  'גינוסר':      KINNERET_POOL,
+  'עמק הירדן':   KINNERET_POOL,
   'שפלת יהודה':  DEFAULT_POOL,
 
   // Cities
@@ -107,8 +116,8 @@ export const LOCATION_IMAGE_MAP: Record<string, string[]> = {
   'ירושלים':      JERUSALEM_POOL,
   'תל אביב':      TEL_AVIV_POOL,
   'חיפה':         HAIFA_POOL,
-  'טבריה':        NORTH_POOL,
-  'כנרת':         NORTH_POOL,
+  'טבריה':        KINNERET_POOL,
+  'כנרת':         KINNERET_POOL,
   'נצרת':         NORTH_POOL,
   'קיסריה':       CAESAREA_POOL,
   'הרצליה':       HERZLIYA_POOL,
