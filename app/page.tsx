@@ -158,10 +158,10 @@ export default function Home() {
             <span>{t.switchLang}</span>
           </button>
 
-          {/* Publish Deal CTA — right */}
+          {/* Publish Deal CTA — right (desktop only) */}
           <button
             onClick={() => setShowPublishModal(true)}
-            className="absolute right-4 top-5 flex items-center gap-1 rounded-full border border-orange-500 px-3 py-1.5 text-sm font-semibold text-orange-600 transition-all hover:bg-orange-50 active:scale-95"
+            className="absolute right-4 top-5 hidden items-center gap-1 rounded-full border border-orange-500 px-3 py-1.5 text-sm font-semibold text-orange-600 transition-all hover:bg-orange-50 active:scale-95 md:flex"
           >
             {t.publishDeal}
           </button>
@@ -262,6 +262,15 @@ export default function Home() {
           onPublish={handlePublish}
         />
       )}
+
+      {/* ══════════════════════════════════════════ MOBILE FAB (bottom) */}
+      <button
+        onClick={() => setShowPublishModal(true)}
+        className="fixed bottom-8 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#D05C3A] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(208,92,58,0.45)] transition-transform active:scale-95 md:hidden"
+      >
+        <span className="text-base font-bold leading-none">+</span>
+        <span>פרסם דיל</span>
+      </button>
 
       {/* ══════════════════════════════════════════════════════════ TOAST */}
       {toast && (
