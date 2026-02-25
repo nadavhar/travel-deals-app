@@ -179,7 +179,7 @@ export const RAW_DEALS: RawDeal[] = [
     description_en: 'Luxury penthouse with a private rooftop pool and 360° Mediterranean views. Stunning architecture with concierge service.',
     property_name_en: 'Herzliya Pituach Penthouse',
     location_en: 'Herzliya',
-    url: 'https://www.airbnb.com/rooms/25159305',
+    url: 'https://www.airbnb.com/s/Herzliya--Israel/homes',
   },
   {
     id: 8,
@@ -348,7 +348,7 @@ export const RAW_DEALS: RawDeal[] = [
     description_en: "Eilat's leading all-inclusive resort with access to 7 pools. Penthouse with a private terrace, jacuzzi and coral reef views.",
     property_name_en: 'Leonardo Club Eilat — Penthouse',
     location_en: 'Eilat',
-    url: 'https://www.leonardo-hotels.co.il/he/eilat/leonardo-club-eilat',
+    url: 'https://www.booking.com/hotel/il/leonardo-club-eilat-all-inclusive.html',
   },
   {
     id: 29,
@@ -494,7 +494,7 @@ export const RAW_DEALS: RawDeal[] = [
     description_en: 'Magnificent suite directly on the Sea of Galilee at Kibbutz Ginosar. Infinity pool with lake views and a motorboat for guests.',
     property_name_en: 'Ginosar Resort Suite',
     location_en: 'Sea of Galilee, Jordan Valley',
-    url: 'https://www.nof-ginosar.co.il/',
+    url: 'https://www.booking.com/hotel/il/nof-ginosar.html',
   },
   {
     id: 49,
@@ -507,7 +507,7 @@ export const RAW_DEALS: RawDeal[] = [
     description_en: "Stunning penthouse on Netanya's sea cliff with a huge terrace facing the Mediterranean. 3 bedrooms, full kitchen and luxury design.",
     property_name_en: 'Netanya Sea View Penthouse',
     location_en: 'Netanya',
-    url: 'https://www.airbnb.com/rooms/34521987',
+    url: 'https://www.airbnb.com/s/Netanya--Israel/homes',
   },
   {
     id: 50,
@@ -520,7 +520,7 @@ export const RAW_DEALS: RawDeal[] = [
     description_en: 'Stylishly designed penthouse in Central Carmel with 180° views of the bay, harbor and Carmel cable car. Private rooftop sun pool.',
     property_name_en: 'Haifa Carmel-Sea Penthouse',
     location_en: 'Haifa',
-    url: 'https://www.airbnb.com/rooms/43129876',
+    url: 'https://www.airbnb.com/s/Haifa--Israel/homes',
   },
   {
     id: 51,
@@ -533,7 +533,7 @@ export const RAW_DEALS: RawDeal[] = [
     description_en: 'Ecological penthouse in the heart of the Arava desert facing the Edom Mountains. Unique stargazing experience with a sun pool and spa.',
     property_name_en: 'Sapir Desert Estate Penthouse',
     location_en: 'Arava, Negev',
-    url: 'https://www.airbnb.com/rooms/29847561',
+    url: 'https://www.airbnb.com/s/Arava--Israel/homes',
   },
   {
     id: 52,
@@ -546,7 +546,7 @@ export const RAW_DEALS: RawDeal[] = [
     description_en: 'Luxury villa among the vineyards of Zichron Yaakov with a pool, 4 rooms and Mediterranean views. Includes a private winery tour.',
     property_name_en: 'Zichron Yaakov Carmel Villa',
     location_en: 'Zichron Yaakov',
-    url: 'https://www.airbnb.com/rooms/22938451',
+    url: 'https://www.airbnb.com/s/Zichron-Yaakov--Israel/homes',
   },
   {
     id: 53,
@@ -559,7 +559,7 @@ export const RAW_DEALS: RawDeal[] = [
     description_en: 'Private luxury villa with access to the Dead Sea beach and a mineral pool. 3 bedrooms, private spa and modern desert design.',
     property_name_en: 'Dead Sea Spa Villa',
     location_en: 'Dead Sea',
-    url: 'https://www.airbnb.com/rooms/51234789',
+    url: 'https://www.airbnb.com/s/Dead-Sea--Israel/homes',
   },
   {
     id: 54,
@@ -572,7 +572,7 @@ export const RAW_DEALS: RawDeal[] = [
     description_en: 'Rural villa among Golan wildflowers near a neighboring winery. Heated pool, 4 rooms and views of Mount Hermon and the Hula Valley.',
     property_name_en: 'Golan Heights Villa — Biyosef',
     location_en: 'Golan Heights',
-    url: 'https://www.airbnb.com/rooms/18274635',
+    url: 'https://www.airbnb.com/s/Golan-Heights--Israel/homes',
   },
   {
     id: 55,
@@ -585,7 +585,7 @@ export const RAW_DEALS: RawDeal[] = [
     description_en: 'Private villa with Red Sea views and the mountains of Jordan and Egypt. Heated pool, 5 rooms, tennis court and a private beach.',
     property_name_en: 'Eilat South Villa',
     location_en: 'Eilat',
-    url: 'https://www.airbnb.com/rooms/67812345',
+    url: 'https://www.airbnb.com/s/Eilat--Israel/homes',
   },
 
   // ── REAL PROPERTIES — sourced from live web search ────────────────────────
