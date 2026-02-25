@@ -188,7 +188,6 @@ export default function Home() {
                         : 'border border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
-                    <span className="leading-none">{tab.emoji}</span>
                     <span>{tabLabel[tab.id]}</span>
                     <span className={`rounded-full px-1.5 py-0.5 text-xs font-bold leading-none ${
                       isActive ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-500'
