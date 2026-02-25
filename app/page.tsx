@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Image from 'next/image';
-import { Compass, MapPin } from 'lucide-react';
+import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   filterDeals,
   RAW_DEALS,
@@ -13,15 +13,13 @@ import {
 import { getLocationImage, getLocationKey, LOCATION_IMAGE_MAP } from '@/lib/locationImages';
 
 // ─── Filter once at module level ─────────────────────────────────────────────
-const { validDeals } = filterDeals(RAW_DEALS);
+const { validDeals: INITIAL_DEALS } = filterDeals(RAW_DEALS);
 
-// ─── Pre-compute one image per deal using sequential per-location slots ───────
-// Each location group cycles through its pool: deal 1→slot 0, deal 2→slot 1, …
-// This guarantees variety without any randomness (stable on SSR + hydration).
+// ─── Pre-compute one image per deal (stable on SSR + hydration) ───────────────
 const DEAL_IMAGES: Map<number, string> = (() => {
   const map = new Map<number, string>();
   const counters = new Map<string, number>();
-  for (const deal of validDeals) {
+  for (const deal of INITIAL_DEALS) {
     const key = getLocationKey(deal.location);
     const slot = counters.get(key) ?? 0;
     map.set(deal.id, getLocationImage(deal.location, slot));
@@ -48,6 +46,7 @@ const T = {
     limitLabel:   'מגבלה',
     savings:      'חיסכון',
     bookNow:      'להזמנה',
+    publishDeal:  'פרסם דיל +',
     footerTagline:'חופשה חכמה · ישראל בלבד',
     budgets: [
       { label: 'חופשה ≤ 450 ₪',   cls: 'bg-sky-900/60 text-sky-300' },
@@ -70,6 +69,7 @@ const T = {
     limitLabel:   'Limit',
     savings:      'savings',
     bookNow:      'Book Now',
+    publishDeal:  'Publish Deal +',
     footerTagline:'Smart vacations · Israel only',
     budgets: [
       { label: 'Vacation ≤ ₪450',   cls: 'bg-sky-900/60 text-sky-300' },
@@ -80,14 +80,13 @@ const T = {
   },
 } satisfies Record<Lang, unknown>;
 
-// ─── Per-category design tokens ───────────────────────────────────────────────
+// ─── Design tokens ────────────────────────────────────────────────────────────
 const CAT_RING: Record<Category, string> = {
   vacation:  'sm:hover:ring-orange-200',
   suite:     'sm:hover:ring-orange-200',
   penthouse: 'sm:hover:ring-orange-200',
   villa:     'sm:hover:ring-orange-200',
 };
-// Category dot color on badge
 const CAT_DOT: Record<Category, string> = {
   vacation:  'bg-sky-400',
   suite:     'bg-violet-400',
@@ -95,13 +94,12 @@ const CAT_DOT: Record<Category, string> = {
   villa:     'bg-emerald-400',
 };
 
-// ─── Filter tab definitions ────────────────────────────────────────────────────
-const FILTER_TABS: Array<{ id: string; emoji: string; category: Category | null }> = [
-  { id: 'all',       emoji: '✨', category: null },
-  { id: 'vacation',  emoji: '🏨', category: 'vacation' },
-  { id: 'suite',     emoji: '🛏️', category: 'suite' },
-  { id: 'penthouse', emoji: '🌆', category: 'penthouse' },
-  { id: 'villa',     emoji: '🏡', category: 'villa' },
+const FILTER_TABS: Array<{ id: string; category: Category | null }> = [
+  { id: 'all',       category: null },
+  { id: 'vacation',  category: 'vacation' },
+  { id: 'suite',     category: 'suite' },
+  { id: 'penthouse', category: 'penthouse' },
+  { id: 'villa',     category: 'villa' },
 ];
 
 const FALLBACK_IMG = LOCATION_IMAGE_MAP['default'][0];
@@ -110,8 +108,11 @@ const FALLBACK_IMG = LOCATION_IMAGE_MAP['default'][0];
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Home() {
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [lang, setLang] = useState<Lang>('HE');
+  const [activeFilter, setActiveFilter]         = useState('all');
+  const [lang, setLang]                         = useState<Lang>('HE');
+  const [deals, setDeals]                       = useState<Deal[]>(INITIAL_DEALS);
+  const [showPublishModal, setShowPublishModal] = useState(false);
+  const [toast, setToast]                       = useState<string | null>(null);
 
   const t = T[lang];
 
@@ -126,22 +127,29 @@ export default function Home() {
 
   const filteredDeals =
     activeFilter === 'all'
-      ? validDeals
-      : validDeals.filter((d) => d.category === activeFilter);
+      ? deals
+      : deals.filter((d) => d.category === activeFilter);
+
+  function handlePublish(deal: Deal) {
+    setDeals((prev) => [deal, ...prev]);
+    setShowPublishModal(false);
+    setToast('הדיל פורסם בהצלחה!');
+    setTimeout(() => setToast(null), 3500);
+  }
 
   return (
     <main className="min-h-screen bg-[#f8f9fb]">
 
       {/* ══════════════════════════════════════════════════ STICKY HEADER */}
-      <div className="sticky top-0 z-50 bg-white shadow-sm">
+      <div className="sticky top-0 z-40 bg-white shadow-sm">
 
         {/* ── Centered logo + subtitle ─────────────────────────────────────── */}
         <div className="relative px-4 pb-5 pt-6 text-center">
 
-          {/* Language switcher — absolute, RTL-aware: sits on the left */}
+          {/* Language switcher — left */}
           <button
             onClick={() => setLang((l) => (l === 'HE' ? 'EN' : 'HE'))}
-            className="absolute left-4 top-5 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-gray-500 transition-colors duration-150 hover:bg-gray-100 active:bg-gray-200"
+            className="absolute left-4 top-5 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 active:bg-gray-200"
             aria-label="Switch language"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
@@ -150,11 +158,17 @@ export default function Home() {
             <span>{t.switchLang}</span>
           </button>
 
-          {/* Logo: text + compass icon (RTL: icon to the right of text) */}
+          {/* Publish Deal CTA — right */}
+          <button
+            onClick={() => setShowPublishModal(true)}
+            className="absolute right-4 top-5 flex items-center gap-1 rounded-full border border-orange-500 px-3 py-1.5 text-sm font-semibold text-orange-600 transition-all hover:bg-orange-50 active:scale-95"
+          >
+            {t.publishDeal}
+          </button>
+
+          {/* Logo */}
           <div className="flex items-center justify-center gap-2.5" dir="rtl">
-            <span className="text-2xl font-black tracking-tight text-slate-800">
-              {t.appName}
-            </span>
+            <span className="text-2xl font-black tracking-tight text-slate-800">{t.appName}</span>
             <Compass className="h-7 w-7 shrink-0 text-orange-600" strokeWidth={1.5} />
           </div>
 
@@ -169,14 +183,13 @@ export default function Home() {
 
         {/* ── Filter pills ─────────────────────────────────────────────────── */}
         <div className="mx-auto max-w-5xl">
-          <div className="overflow-x-auto py-3 [&::-webkit-scrollbar]:hidden"
-               style={{ scrollbarWidth: 'none' }}>
+          <div className="overflow-x-auto py-3 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
             <div className="mx-auto flex w-max gap-3 px-4">
               {FILTER_TABS.map((tab) => {
                 const count =
                   tab.category === null
-                    ? validDeals.length
-                    : validDeals.filter((d) => d.category === tab.category).length;
+                    ? deals.length
+                    : deals.filter((d) => d.category === tab.category).length;
                 const isActive = activeFilter === tab.id;
                 return (
                   <button
@@ -226,25 +239,13 @@ export default function Home() {
 
       {/* ══════════════════════════════════════════════════════════ FOOTER */}
       <footer className="relative mt-10 bg-slate-900 px-4 pb-12 pt-10 text-center">
-
-        {/* Terracotta top accent line */}
         <div className="absolute inset-x-0 top-0 h-[3px] bg-orange-600" />
-
-        {/* Compass icon */}
         <div className="flex justify-center">
           <Compass className="h-8 w-8 text-orange-500" strokeWidth={1.5} />
         </div>
-
-        {/* App name */}
         <p className="mt-3 text-xl font-black tracking-tight text-white">{t.appName}</p>
-
-        {/* Tagline */}
         <p className="mt-1.5 text-sm text-slate-400">{t.footerTagline}</p>
-
-        {/* Divider */}
-        <div className="mx-auto mt-7 mb-6 w-16 border-t border-white/10" />
-
-        {/* Budget category pills */}
+        <div className="mx-auto mb-6 mt-7 w-16 border-t border-white/10" />
         <div className="flex flex-wrap justify-center gap-2 text-xs">
           {t.budgets.map((b) => (
             <span key={b.label} className="rounded-full px-3.5 py-1.5 font-semibold text-slate-400 ring-1 ring-white/10">
@@ -253,7 +254,318 @@ export default function Home() {
           ))}
         </div>
       </footer>
+
+      {/* ══════════════════════════════════════════════════ PUBLISH MODAL */}
+      {showPublishModal && (
+        <PublishModal
+          onClose={() => setShowPublishModal(false)}
+          onPublish={handlePublish}
+        />
+      )}
+
+      {/* ══════════════════════════════════════════════════════════ TOAST */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 whitespace-nowrap rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-2xl">
+          {toast}
+        </div>
+      )}
     </main>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PUBLISH MODAL
+// ─────────────────────────────────────────────────────────────────────────────
+interface MediaFile {
+  file: File;
+  previewUrl: string;
+  kind: 'image' | 'video';
+}
+
+function PublishModal({
+  onClose,
+  onPublish,
+}: {
+  onClose: () => void;
+  onPublish: (deal: Deal) => void;
+}) {
+  const [propertyName, setPropertyName] = useState('');
+  const [location, setLocation]         = useState('');
+  const [description, setDescription]   = useState('');
+  const [category, setCategory]         = useState<Category | ''>('');
+  const [price, setPrice]               = useState('');
+  const [url, setUrl]                   = useState('');
+  const [mediaFiles, setMediaFiles]     = useState<MediaFile[]>([]);
+  const [isDragging, setIsDragging]     = useState(false);
+  const fileInputRef                    = useRef<HTMLInputElement>(null);
+
+  const budgetLimit = category ? BUDGET_LIMITS[category as Category] : null;
+  const priceNum    = parseFloat(price);
+  const priceError  =
+    budgetLimit !== null && !isNaN(priceNum) && priceNum > budgetLimit
+      ? `מחיר חורג מהמגבלה — מקסימום ${budgetLimit.toLocaleString('he-IL')} ₪`
+      : null;
+
+  const isValid =
+    propertyName.trim() !== '' &&
+    location.trim() !== '' &&
+    category !== '' &&
+    !isNaN(priceNum) && priceNum > 0 &&
+    !priceError &&
+    url.startsWith('https://');
+
+  function addFiles(files: File[]) {
+    const next: MediaFile[] = files
+      .filter((f) => f.type.startsWith('image/') || f.type.startsWith('video/'))
+      .map((f) => ({
+        file: f,
+        previewUrl: URL.createObjectURL(f),
+        kind: f.type.startsWith('video/') ? ('video' as const) : ('image' as const),
+      }));
+    setMediaFiles((prev) => [...prev, ...next]);
+  }
+
+  function removeFile(index: number) {
+    setMediaFiles((prev) => {
+      URL.revokeObjectURL(prev[index].previewUrl);
+      return prev.filter((_, i) => i !== index);
+    });
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(true);
+  }
+  function handleDragLeave(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(false);
+  }
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragging(false);
+    addFiles(Array.from(e.dataTransfer.files));
+  }
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.files) addFiles(Array.from(e.target.files));
+    e.target.value = '';
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!isValid || !category) return;
+    const imageUrls = mediaFiles.filter((m) => m.kind === 'image').map((m) => m.previewUrl);
+    const videoEntry = mediaFiles.find((m) => m.kind === 'video');
+    onPublish({
+      id: Date.now(),
+      category: category as Category,
+      property_name: propertyName.trim(),
+      location: location.trim(),
+      price_per_night_ils: priceNum,
+      description: description.trim(),
+      url,
+      imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
+      videoUrl: videoEntry?.previewUrl ?? null,
+    });
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="relative w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl"
+        style={{ maxHeight: '92vh' }}
+        dir="rtl"
+      >
+        {/* ── Modal header ──── */}
+        <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-3xl bg-white px-6 py-4 shadow-[0_1px_0_#f1f5f9]">
+          <h2 className="text-lg font-black text-slate-900">פרסם דיל חדש</h2>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="px-6 pb-8 pt-5">
+
+          {/* ── Media Upload Zone ──── */}
+          <div className="mb-6">
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
+              תמונות ווידאו <span className="font-normal text-gray-400">(אופציונלי)</span>
+            </label>
+            <div
+              className={`flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-4 py-8 text-center transition-all ${
+                isDragging
+                  ? 'border-orange-400 bg-orange-50'
+                  : 'border-gray-200 bg-gray-50 hover:border-orange-300 hover:bg-orange-50/40'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <div className={`rounded-full p-3 transition-colors ${isDragging ? 'bg-orange-100' : 'bg-white shadow-sm'}`}>
+                <Upload size={22} className={isDragging ? 'text-orange-500' : 'text-gray-400'} />
+              </div>
+              <p className="text-sm font-medium text-gray-600">
+                {isDragging ? 'שחרר את הקבצים כאן' : 'גרור קבצים לכאן'}
+              </p>
+              <p className="text-xs text-gray-400">או לחץ לבחירת תמונות ווידאו</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                className="hidden"
+                onChange={handleFileChange}
+              />
+            </div>
+
+            {/* Thumbnails */}
+            {mediaFiles.length > 0 && (
+              <div className="mt-3 grid grid-cols-4 gap-2">
+                {mediaFiles.map((m, i) => (
+                  <div key={i} className="group relative aspect-square overflow-hidden rounded-xl bg-gray-100">
+                    {m.kind === 'video' ? (
+                      <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-slate-800">
+                        <Play size={18} className="text-white/80" />
+                        <span className="text-[10px] text-white/50">וידאו</span>
+                      </div>
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={m.previewUrl} alt="" className="h-full w-full object-cover" />
+                    )}
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); removeFile(i); }}
+                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                    >
+                      <X size={10} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ── Form fields ──── */}
+          <div className="space-y-4">
+
+            {/* Property Name */}
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">שם המקום</label>
+              <input
+                type="text"
+                value={propertyName}
+                onChange={(e) => setPropertyName(e.target.value)}
+                placeholder="לדוגמה: וילת הכרמל"
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-slate-900 placeholder-gray-400 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                required
+              />
+            </div>
+
+            {/* Location */}
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">מיקום</label>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="לדוגמה: אילת, ירושלים"
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-slate-900 placeholder-gray-400 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                required
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">תיאור קצר</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="תאר את המקום בקצרה..."
+                rows={2}
+                className="w-full resize-none rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-slate-900 placeholder-gray-400 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+              />
+            </div>
+
+            {/* Category + Price */}
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">קטגוריה</label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as Category | '')}
+                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                  required
+                >
+                  <option value="">בחר קטגוריה</option>
+                  <option value="vacation">חופשה (≤ 450 ₪)</option>
+                  <option value="suite">סוויטה (≤ 450 ₪)</option>
+                  <option value="penthouse">פנטהאוז (≤ 990 ₪)</option>
+                  <option value="villa">וילה (≤ 1,990 ₪)</option>
+                </select>
+              </div>
+
+              <div className="flex-1">
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">מחיר ללילה (₪)</label>
+                <input
+                  type="number"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder={budgetLimit ? String(budgetLimit) : '450'}
+                  min="1"
+                  className={`w-full rounded-xl border px-4 py-2.5 text-sm text-slate-900 placeholder-gray-400 outline-none transition focus:ring-2 ${
+                    priceError
+                      ? 'border-red-400 focus:border-red-400 focus:ring-red-100'
+                      : 'border-gray-200 focus:border-orange-400 focus:ring-orange-100'
+                  }`}
+                  required
+                />
+                {priceError && (
+                  <p className="mt-1 text-xs font-medium text-red-500">{priceError}</p>
+                )}
+                {budgetLimit && !priceError && (
+                  <p className="mt-1 text-xs text-gray-400">מקסימום: {budgetLimit.toLocaleString('he-IL')} ₪</p>
+                )}
+              </div>
+            </div>
+
+            {/* URL */}
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">קישור להזמנה</label>
+              <input
+                type="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://www.booking.com/..."
+                className={`w-full rounded-xl border px-4 py-2.5 text-sm text-slate-900 placeholder-gray-400 outline-none transition focus:ring-2 ${
+                  url && !url.startsWith('https://')
+                    ? 'border-red-400 focus:border-red-400 focus:ring-red-100'
+                    : 'border-gray-200 focus:border-orange-400 focus:ring-orange-100'
+                }`}
+                required
+              />
+              {url && !url.startsWith('https://') && (
+                <p className="mt-1 text-xs font-medium text-red-500">הקישור חייב להתחיל ב-https://</p>
+              )}
+            </div>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={!isValid}
+            className="mt-6 w-full rounded-xl bg-orange-600 py-3 text-sm font-black text-white shadow-sm transition-all hover:bg-orange-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            פרסם דיל
+          </button>
+        </form>
+      </div>
+    </div>
   );
 }
 
@@ -271,8 +583,10 @@ function DealCard({
   t: CardT;
   catLabel: Record<Category, string>;
 }) {
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [imgSrc, setImgSrc]       = useState(() => DEAL_IMAGES.get(deal.id) ?? FALLBACK_IMG);
+  const [imgLoaded, setImgLoaded]   = useState(false);
+  const [imgSrc, setImgSrc]         = useState(() => DEAL_IMAGES.get(deal.id) ?? FALLBACK_IMG);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [showVideo, setShowVideo]   = useState(false);
 
   const description   = t.lang === 'EN' && deal.description_en   ? deal.description_en   : deal.description;
   const propertyName  = t.lang === 'EN' && deal.property_name_en ? deal.property_name_en : deal.property_name;
@@ -281,107 +595,196 @@ function DealCard({
   const limit      = BUDGET_LIMITS[deal.category];
   const savingsPct = Math.round(((limit - deal.price_per_night_ils) / limit) * 100);
 
+  const images      = deal.imageUrls ?? [];
+  const hasCarousel = images.length > 0;
+  const totalSlides = images.length;
+
+  function prev(e: React.MouseEvent) {
+    e.preventDefault();
+    setActiveSlide((i) => (i - 1 + totalSlides) % totalSlides);
+  }
+  function next(e: React.MouseEvent) {
+    e.preventDefault();
+    setActiveSlide((i) => (i + 1) % totalSlides);
+  }
+
   return (
-    <article
-      className={`group flex flex-col overflow-hidden rounded-2xl bg-white
-        shadow-[0_2px_8px_rgba(0,0,0,0.06),0_0_1px_rgba(0,0,0,0.04)]
-        ring-1 ring-black/[0.05]
-        transition-all duration-300
-        sm:hover:-translate-y-1.5
-        sm:hover:shadow-[0_16px_40px_rgba(0,0,0,0.13),0_2px_8px_rgba(0,0,0,0.05)]
-        sm:hover:ring-2
-        ${CAT_RING[deal.category]}`}
-    >
-      {/* ── Photo ──────────────────────────────────────────────────────────── */}
-      <div className="relative aspect-[3/2] overflow-hidden bg-gray-100">
+    <>
+      <article
+        className={`group flex flex-col overflow-hidden rounded-2xl bg-white
+          shadow-[0_2px_8px_rgba(0,0,0,0.06),0_0_1px_rgba(0,0,0,0.04)]
+          ring-1 ring-black/[0.05]
+          transition-all duration-300
+          sm:hover:-translate-y-1.5
+          sm:hover:shadow-[0_16px_40px_rgba(0,0,0,0.13),0_2px_8px_rgba(0,0,0,0.05)]
+          sm:hover:ring-2
+          ${CAT_RING[deal.category]}`}
+      >
+        {/* ── Image / Carousel area ────────────────────────────────────────── */}
+        <div className="relative aspect-[3/2] overflow-hidden bg-gray-100" dir="ltr">
 
-        {!imgLoaded && <div className="absolute inset-0 skeleton" />}
+          {hasCarousel ? (
+            <>
+              {/* Sliding track */}
+              <div
+                className="flex h-full transition-transform duration-300 ease-in-out"
+                style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+              >
+                {images.map((src, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={i}
+                    src={src}
+                    alt={locationLabel}
+                    className="h-full w-full shrink-0 object-cover"
+                  />
+                ))}
+              </div>
 
-        <Image
-          src={imgSrc}
-          alt={locationLabel}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className={`object-cover transition-transform duration-700 group-hover:scale-[1.04] ${
-            imgLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          onLoad={() => setImgLoaded(true)}
-          onError={() => {
-            if (imgSrc !== FALLBACK_IMG) setImgSrc(FALLBACK_IMG);
-            setImgLoaded(true);
-          }}
-        />
+              {/* Prev / Next arrows */}
+              {totalSlides > 1 && (
+                <>
+                  <button
+                    onClick={prev}
+                    className="absolute left-2 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-700 opacity-0 shadow backdrop-blur-sm transition-opacity group-hover:opacity-100 hover:bg-white"
+                  >
+                    <ChevronLeft size={14} />
+                  </button>
+                  <button
+                    onClick={next}
+                    className="absolute right-2 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-700 opacity-0 shadow backdrop-blur-sm transition-opacity group-hover:opacity-100 hover:bg-white"
+                  >
+                    <ChevronRight size={14} />
+                  </button>
+                </>
+              )}
 
-        {/* Cinematic bottom vignette */}
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
+              {/* Dots */}
+              {totalSlides > 1 && (
+                <div className="absolute bottom-10 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
+                  {images.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={(e) => { e.preventDefault(); setActiveSlide(i); }}
+                      className={`h-1.5 rounded-full transition-all ${
+                        i === activeSlide ? 'w-4 bg-white' : 'w-1.5 bg-white/60'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {!imgLoaded && <div className="absolute inset-0 skeleton" />}
+              <Image
+                src={imgSrc}
+                alt={locationLabel}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className={`object-cover transition-transform duration-700 group-hover:scale-[1.04] ${
+                  imgLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                onLoad={() => setImgLoaded(true)}
+                onError={() => {
+                  if (imgSrc !== FALLBACK_IMG) setImgSrc(FALLBACK_IMG);
+                  setImgLoaded(true);
+                }}
+              />
+            </>
+          )}
 
-        {/* Savings badge — top right */}
-        {savingsPct > 0 && (
-          <div className="absolute right-3 top-3">
-            <span className="rounded-full bg-orange-600 px-2.5 py-1 text-xs font-black text-white shadow-md">
-              -{savingsPct}%
-            </span>
-          </div>
-        )}
+          {/* Cinematic vignette */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
 
-        {/* Category badge — bottom left, frosted glass */}
-        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 shadow-sm backdrop-blur-sm">
-          <span className={`h-1.5 w-1.5 rounded-full ${CAT_DOT[deal.category]}`} />
-          <span className="text-xs font-semibold text-slate-700">{catLabel[deal.category]}</span>
-        </div>
-      </div>
+          {/* Video play button */}
+          {deal.videoUrl && (
+            <button
+              onClick={(e) => { e.preventDefault(); setShowVideo(true); }}
+              className="absolute left-1/2 top-1/2 z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white ring-2 ring-white/30 backdrop-blur-sm transition-transform hover:scale-110"
+            >
+              <Play size={20} fill="white" />
+            </button>
+          )}
 
-      {/* ── Card body ──────────────────────────────────────────────────────── */}
-      <div className="flex flex-1 flex-col px-4 pb-5 pt-4">
-
-        {/* Location */}
-        <div className="mb-1.5 flex items-center gap-1 text-xs text-gray-400">
-          <MapPin className="h-3 w-3 shrink-0" strokeWidth={2} />
-          <span className="line-clamp-1">{locationLabel}</span>
-        </div>
-
-        {/* Property name */}
-        <h2 className="mb-2 line-clamp-1 text-[16px] font-bold leading-snug text-slate-900">
-          {propertyName}
-        </h2>
-
-        {/* Description */}
-        <p className="mb-4 line-clamp-2 flex-1 text-[13px] leading-relaxed text-slate-400">
-          {description}
-        </p>
-
-        {/* Price + CTA */}
-        <div className="flex items-end justify-between gap-3">
-
-          {/* Price block */}
-          <div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-[22px] font-black leading-none text-slate-900">
-                {deal.price_per_night_ils.toLocaleString('he-IL')} ₪
+          {/* Savings badge */}
+          {savingsPct > 0 && (
+            <div className="pointer-events-none absolute right-3 top-3">
+              <span className="rounded-full bg-orange-600 px-2.5 py-1 text-xs font-black text-white shadow-md">
+                -{savingsPct}%
               </span>
             </div>
-            <p className="mt-0.5 text-xs text-gray-400">
-              <span className="line-through decoration-gray-300">
-                {limit.toLocaleString('he-IL')} ₪
-              </span>
-              <span className="mr-1 text-gray-400"> {t.perNight}</span>
-            </p>
-          </div>
+          )}
 
-          {/* CTA — terracotta */}
-          <a
-            href={deal.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex shrink-0 items-center gap-1.5 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all duration-200 hover:bg-orange-500 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.97] active:shadow-none"
-          >
-            {t.bookNow}
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="h-3.5 w-3.5 opacity-80">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-            </svg>
-          </a>
+          {/* Category badge */}
+          <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 shadow-sm backdrop-blur-sm">
+            <span className={`h-1.5 w-1.5 rounded-full ${CAT_DOT[deal.category]}`} />
+            <span className="text-xs font-semibold text-slate-700">{catLabel[deal.category]}</span>
+          </div>
         </div>
-      </div>
-    </article>
+
+        {/* ── Card body ────────────────────────────────────────────────────── */}
+        <div className="flex flex-1 flex-col px-4 pb-5 pt-4">
+          <div className="mb-1.5 flex items-center gap-1 text-xs text-gray-400">
+            <MapPin className="h-3 w-3 shrink-0" strokeWidth={2} />
+            <span className="line-clamp-1">{locationLabel}</span>
+          </div>
+          <h2 className="mb-2 line-clamp-1 text-[16px] font-bold leading-snug text-slate-900">
+            {propertyName}
+          </h2>
+          <p className="mb-4 line-clamp-2 flex-1 text-[13px] leading-relaxed text-slate-400">
+            {description}
+          </p>
+
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-[22px] font-black leading-none text-slate-900">
+                  {deal.price_per_night_ils.toLocaleString('he-IL')} ₪
+                </span>
+              </div>
+              <p className="mt-0.5 text-xs text-gray-400">
+                <span className="line-through decoration-gray-300">{limit.toLocaleString('he-IL')} ₪</span>
+                <span className="mr-1">{t.perNight}</span>
+              </p>
+            </div>
+
+            <a
+              href={deal.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex shrink-0 items-center gap-1.5 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-orange-500 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.97] active:shadow-none"
+            >
+              {t.bookNow}
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="h-3.5 w-3.5 opacity-80">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      {/* ── Video Modal ──────────────────────────────────────────────────────── */}
+      {showVideo && deal.videoUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+          onClick={() => setShowVideo(false)}
+        >
+          <button
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+            onClick={() => setShowVideo(false)}
+          >
+            <X size={20} />
+          </button>
+          <video
+            src={deal.videoUrl}
+            controls
+            autoPlay
+            className="max-h-[85vh] max-w-[90vw] rounded-xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+    </>
   );
 }

@@ -33,6 +33,10 @@ export interface Deal {
   property_name_en?: string;
   location_en?: string;
   url: string;
+  /** UGC: local blob URLs for uploaded images */
+  imageUrls?: string[];
+  /** UGC: local blob URL for uploaded video */
+  videoUrl?: string | null;
 }
 
 export interface FilterResult {
