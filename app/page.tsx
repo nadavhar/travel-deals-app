@@ -206,7 +206,7 @@ export default function Home() {
             <p className="mt-2 text-sm text-gray-400">{t.noDealsHint}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-y-3 sm:grid-cols-2 sm:gap-5 sm:p-5 lg:grid-cols-3 lg:gap-6 lg:p-6">
+          <div className="grid grid-cols-1 gap-4 p-3 sm:grid-cols-2 sm:gap-5 sm:p-5 lg:grid-cols-3 lg:gap-6 lg:p-6">
             {filteredDeals.map((deal) => (
               <DealCard
                 key={deal.id}
@@ -271,7 +271,7 @@ function DealCard({
       className={`group overflow-hidden bg-white
         shadow-[0_1px_4px_rgba(0,0,0,0.05),0_4px_16px_rgba(0,0,0,0.05)]
         ring-1 ring-gray-100/80 transition-all duration-300
-        sm:rounded-3xl
+        rounded-3xl
         sm:hover:-translate-y-1
         sm:hover:shadow-[0_8px_32px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)]
         sm:hover:ring-2
