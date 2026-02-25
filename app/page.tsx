@@ -2,13 +2,11 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Compass } from 'lucide-react';
+import { Compass, MapPin } from 'lucide-react';
 import {
   filterDeals,
   RAW_DEALS,
   BUDGET_LIMITS,
-  CATEGORY_COLORS,
-  CATEGORY_ACCENT,
   type Category,
   type Deal,
 } from '@/lib/deals';
@@ -83,32 +81,18 @@ const T = {
 } satisfies Record<Lang, unknown>;
 
 // ─── Per-category design tokens ───────────────────────────────────────────────
-const CAT_PRICE: Record<Category, string> = {
-  vacation:  'text-sky-600',
-  suite:     'text-purple-600',
-  penthouse: 'text-amber-600',
-  villa:     'text-emerald-600',
-};
 const CAT_RING: Record<Category, string> = {
-  vacation:  'sm:hover:ring-sky-200',
-  suite:     'sm:hover:ring-purple-200',
-  penthouse: 'sm:hover:ring-amber-200',
-  villa:     'sm:hover:ring-emerald-200',
+  vacation:  'sm:hover:ring-orange-200',
+  suite:     'sm:hover:ring-orange-200',
+  penthouse: 'sm:hover:ring-orange-200',
+  villa:     'sm:hover:ring-orange-200',
 };
-// CTA: category gradient buttons
-const CAT_CTA: Record<Category, string> = {
-  vacation:  'from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500',
-  suite:     'from-purple-500 to-violet-600 hover:from-purple-400 hover:to-violet-500',
-  penthouse: 'from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400',
-  villa:     'from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500',
-};
-// Active filter tab: category-specific colour
-const TAB_ACTIVE: Record<string, string> = {
-  all:       'bg-slate-900 shadow-slate-900/20',
-  vacation:  'bg-sky-600 shadow-sky-600/20',
-  suite:     'bg-purple-600 shadow-purple-600/20',
-  penthouse: 'bg-amber-500 shadow-amber-500/20',
-  villa:     'bg-emerald-600 shadow-emerald-600/20',
+// Category dot color on badge
+const CAT_DOT: Record<Category, string> = {
+  vacation:  'bg-sky-400',
+  suite:     'bg-violet-400',
+  penthouse: 'bg-amber-400',
+  villa:     'bg-emerald-400',
 };
 
 // ─── Filter tab definitions ────────────────────────────────────────────────────
@@ -285,22 +269,21 @@ function DealCard({
   const locationLabel = t.lang === 'EN' && deal.location_en      ? deal.location_en      : deal.location;
 
   const limit      = BUDGET_LIMITS[deal.category];
-  const savings    = limit - deal.price_per_night_ils;
-  const savingsPct = Math.round((savings / limit) * 100);
+  const savingsPct = Math.round(((limit - deal.price_per_night_ils) / limit) * 100);
 
   return (
     <article
-      className={`group overflow-hidden bg-white
-        shadow-[0_1px_4px_rgba(0,0,0,0.05),0_4px_16px_rgba(0,0,0,0.05)]
-        ring-1 ring-gray-100/80 transition-all duration-300
-        rounded-3xl
-        sm:hover:-translate-y-1
-        sm:hover:shadow-[0_8px_32px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)]
+      className={`group flex flex-col overflow-hidden rounded-2xl bg-white
+        shadow-[0_2px_8px_rgba(0,0,0,0.06),0_0_1px_rgba(0,0,0,0.04)]
+        ring-1 ring-black/[0.05]
+        transition-all duration-300
+        sm:hover:-translate-y-1.5
+        sm:hover:shadow-[0_16px_40px_rgba(0,0,0,0.13),0_2px_8px_rgba(0,0,0,0.05)]
         sm:hover:ring-2
         ${CAT_RING[deal.category]}`}
     >
       {/* ── Photo ──────────────────────────────────────────────────────────── */}
-      <div className="relative aspect-[16/10] overflow-hidden rounded-t-3xl bg-gray-100">
+      <div className="relative aspect-[3/2] overflow-hidden bg-gray-100">
 
         {!imgLoaded && <div className="absolute inset-0 skeleton" />}
 
@@ -309,7 +292,7 @@ function DealCard({
           alt={locationLabel}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className={`object-cover transition-all duration-500 group-hover:scale-105 ${
+          className={`object-cover transition-transform duration-700 group-hover:scale-[1.04] ${
             imgLoaded ? 'opacity-100' : 'opacity-0'
           }`}
           onLoad={() => setImgLoaded(true)}
@@ -319,68 +302,68 @@ function DealCard({
           }}
         />
 
-        {/* Subtle bottom vignette for depth */}
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/20 to-transparent" />
+        {/* Cinematic bottom vignette */}
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
 
-        {/* Category accent bar */}
-        <div className={`absolute inset-x-0 top-0 h-[3px] ${CATEGORY_ACCENT[deal.category]}`} />
-
-        {/* Badges — RTL: first → right, second → left */}
-        <div className="absolute inset-x-0 top-3 flex items-center justify-between px-3">
-          <span className={`rounded-full px-2.5 py-1 text-xs font-bold shadow-sm backdrop-blur-sm ${CATEGORY_COLORS[deal.category]}`}>
-            {catLabel[deal.category]}
-          </span>
-          {savingsPct > 0 && (
-            <span className="rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-2.5 py-1 text-xs font-black text-white shadow-sm">
-              {savingsPct}% {t.savings}
+        {/* Savings badge — top right */}
+        {savingsPct > 0 && (
+          <div className="absolute right-3 top-3">
+            <span className="rounded-full bg-orange-600 px-2.5 py-1 text-xs font-black text-white shadow-md">
+              -{savingsPct}%
             </span>
-          )}
+          </div>
+        )}
+
+        {/* Category badge — bottom left, frosted glass */}
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 shadow-sm backdrop-blur-sm">
+          <span className={`h-1.5 w-1.5 rounded-full ${CAT_DOT[deal.category]}`} />
+          <span className="text-xs font-semibold text-slate-700">{catLabel[deal.category]}</span>
         </div>
       </div>
 
-      {/* ── White card body ────────────────────────────────────────────────── */}
-      <div className="px-4 pb-4 pt-3.5">
+      {/* ── Card body ──────────────────────────────────────────────────────── */}
+      <div className="flex flex-1 flex-col px-4 pb-5 pt-4">
 
-        {/* Row 1 — Property name */}
-        <h2 className="mb-1 line-clamp-1 text-[15px] font-bold leading-snug text-slate-900">
-          {propertyName}
-        </h2>
-
-        {/* Row 2 — Location */}
-        <div className="mb-2.5 flex items-center gap-1 text-sm text-slate-500">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5 shrink-0 text-slate-400">
-            <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-          </svg>
+        {/* Location */}
+        <div className="mb-1.5 flex items-center gap-1 text-xs text-gray-400">
+          <MapPin className="h-3 w-3 shrink-0" strokeWidth={2} />
           <span className="line-clamp-1">{locationLabel}</span>
         </div>
 
-        {/* Row 3 — Description */}
-        <p className="mb-3.5 line-clamp-2 text-sm leading-relaxed text-slate-400">
+        {/* Property name */}
+        <h2 className="mb-2 line-clamp-1 text-[16px] font-bold leading-snug text-slate-900">
+          {propertyName}
+        </h2>
+
+        {/* Description */}
+        <p className="mb-4 line-clamp-2 flex-1 text-[13px] leading-relaxed text-slate-400">
           {description}
         </p>
 
-        {/* Row 4 — Price + CTA */}
-        <div className="flex items-center justify-between gap-3 border-t border-gray-100 pt-3">
+        {/* Price + CTA */}
+        <div className="flex items-end justify-between gap-3">
 
           {/* Price block */}
           <div>
             <div className="flex items-baseline gap-1">
-              <span className={`text-xl font-black ${CAT_PRICE[deal.category]}`}>
+              <span className="text-[22px] font-black leading-none text-slate-900">
                 {deal.price_per_night_ils.toLocaleString('he-IL')} ₪
               </span>
-              <span className="text-xs text-slate-400">{t.perNight}</span>
             </div>
-            <p className="mt-0.5 text-xs text-slate-400 line-through decoration-slate-300">
-              {t.limitLabel} {limit.toLocaleString('he-IL')} ₪
+            <p className="mt-0.5 text-xs text-gray-400">
+              <span className="line-through decoration-gray-300">
+                {limit.toLocaleString('he-IL')} ₪
+              </span>
+              <span className="mr-1 text-gray-400"> {t.perNight}</span>
             </p>
           </div>
 
-          {/* CTA — category gradient */}
+          {/* CTA — terracotta */}
           <a
             href={deal.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r px-5 py-2 text-sm font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.97] active:shadow-none ${CAT_CTA[deal.category]}`}
+            className="flex shrink-0 items-center gap-1.5 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all duration-200 hover:bg-orange-500 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.97] active:shadow-none"
           >
             {t.bookNow}
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="h-3.5 w-3.5 opacity-80">
