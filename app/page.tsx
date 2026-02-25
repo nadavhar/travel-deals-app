@@ -15,14 +15,7 @@ import {
 import { getLocationImage, LOCATION_IMAGE_MAP } from '@/lib/locationImages';
 
 // ─── Filter once at module level ─────────────────────────────────────────────
-const {
-  validDeals,
-  rejectedCount,
-  rejectedByLocation,
-  rejectedByBudget,
-  rejectedByUrl,
-  rejectionReasons,
-} = filterDeals(RAW_DEALS);
+const { validDeals } = filterDeals(RAW_DEALS);
 
 // ─── Per-category design tokens ───────────────────────────────────────────────
 const CAT_PRICE: Record<Category, string> = {
@@ -56,7 +49,7 @@ const FALLBACK_IMG = LOCATION_IMAGE_MAP['default'];
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Home() {
   const [activeFilter, setActiveFilter] = useState('all');
-  const [showRejected, setShowRejected] = useState(false);
+  const [lang, setLang] = useState<'HE' | 'EN'>('HE');
 
   const filteredDeals =
     activeFilter === 'all'
@@ -66,24 +59,35 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50">
 
-      {/* ══════════════════════════════════════════════════ STICKY APP BAR */}
-      <div className="sticky top-0 z-30 bg-white/95 shadow-sm backdrop-blur-md">
+      {/* ══════════════════════════════════════════════════ STICKY HEADER */}
+      {/* Unified sticky block: app bar + filter tabs. Cards tuck below.   */}
+      <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
 
         {/* ── App Bar ─────────────────────────────────────────────────────── */}
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-5">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
 
-          {/* Left: dismissible AI badge */}
+          {/* Left: language switcher */}
           <button
-            onClick={() => setShowRejected((v) => !v)}
-            className="flex min-h-[36px] items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3.5 py-1 text-xs font-semibold text-indigo-600 transition-all duration-150 hover:bg-indigo-100 active:scale-95"
-            title="הצג/הסתר דילים שנפסלו"
+            onClick={() => setLang((l) => (l === 'HE' ? 'EN' : 'HE'))}
+            className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors duration-150 hover:bg-gray-100 active:bg-gray-200"
+            aria-label="החלף שפה"
           >
-            <span className="relative flex h-1.5 w-1.5 shrink-0">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            </span>
-            <span>✨ AI · {validDeals.length} דילים</span>
-            <span className="opacity-40">{showRejected ? '▲' : '▼'}</span>
+            {/* Globe icon */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="h-4 w-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"
+              />
+            </svg>
+            <span>{lang}</span>
           </button>
 
           {/* Right: Logo */}
@@ -94,50 +98,6 @@ export default function Home() {
             <span className="text-2xl leading-none">🏖️</span>
           </div>
         </div>
-
-        {/* ── Rejection panel ──────────────────────────────────────────────── */}
-        {showRejected && (
-          <div className="border-t border-gray-100 bg-slate-50 px-5 py-3">
-            <div className="mx-auto max-w-5xl">
-              <div className="mb-2 flex flex-wrap items-center gap-2">
-                <span className="text-xs font-bold text-red-600">
-                  🚫 {rejectedCount} נפסלו על ידי הסוכן
-                </span>
-                <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-600">
-                  🌍 {rejectedByLocation} מיקום
-                </span>
-                <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-semibold text-orange-600">
-                  💸 {rejectedByBudget} תקציב
-                </span>
-                <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-600">
-                  🔗 {rejectedByUrl} URL
-                </span>
-              </div>
-              <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-3">
-                {rejectionReasons.map((r, i) => {
-                  const s = {
-                    location: { b: 'border-red-100',    ic: '🌍', t: 'text-red-500' },
-                    budget:   { b: 'border-orange-100', ic: '💸', t: 'text-orange-500' },
-                    url:      { b: 'border-yellow-100', ic: '🔗', t: 'text-yellow-600' },
-                  }[r.type];
-                  return (
-                    <div
-                      key={i}
-                      className={`flex items-start gap-1.5 rounded-xl border ${s.b} bg-white px-3 py-1.5 text-xs`}
-                    >
-                      <span className="mt-0.5 shrink-0">{s.ic}</span>
-                      <div>
-                        <span className="font-semibold text-gray-800">{r.name}</span>
-                        <span className="mx-1 text-gray-300">—</span>
-                        <span className={s.t}>{r.reason}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* ── Filter tabs ──────────────────────────────────────────────────── */}
         <div className="border-t border-gray-100">
