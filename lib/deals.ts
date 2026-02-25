@@ -14,6 +14,7 @@ export interface RawDeal {
   is_in_israel: boolean;
   price_per_night_ils: number;
   description: string;
+  description_en?: string;
   /** Original scraped deal page URL */
   url: string;
 }
@@ -26,6 +27,7 @@ export interface Deal {
   location: string;
   price_per_night_ils: number;
   description: string;
+  description_en?: string;
   url: string;
 }
 
@@ -92,6 +94,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 420,
     description: 'מלון בוטיק קסום בלב יפו העתיקה עם נוף לים ואווירה מדהימה. כולל ארוחת בוקר עשירה ומרפסת פרטית.',
+    description_en: 'Enchanting boutique hotel in the heart of ancient Jaffa with sea views and an amazing atmosphere. Includes a rich breakfast and a private balcony.',
     url: 'https://www.booking.com/hotel/il/margosa-tel-aviv-jaffa.html',
   },
   {
@@ -102,6 +105,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 380,
     description: 'צימר נעים עם נוף פנורמי עוצר נשימה לכנרת. שקט מוחלט, מרפסת ענקית וסגנון כפרי חמים.',
+    description_en: 'Cozy cabin with a breathtaking panoramic view of the Sea of Galilee. Complete tranquility, a huge balcony and a warm rustic style.',
     url: 'https://www.booking.com/hotel/il/ginosar-inn-country-lodging.html',
   },
   {
@@ -112,6 +116,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 320,
     description: 'לינה וארוחת בוקר ביתית בלב הכרמל עם נוף לים התיכון. מיקום אידיאלי לסיורים בעיר.',
+    description_en: 'Bed and breakfast in the heart of Mount Carmel with Mediterranean Sea views. Ideal location for exploring the city.',
     url: 'https://www.booking.com/hotel/il/haifa-guest-house-haifa.html',
   },
   {
@@ -122,6 +127,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 290,
     description: 'לינה ייחודית על שפת המכתש הגדול בעולם. כולל טיול לילי לצפייה בכוכבים וארוחת בוקר ישראלית.',
+    description_en: "Unique stay on the edge of the world's largest crater. Includes a night stargazing tour and an Israeli breakfast.",
     url: 'https://www.booking.com/hotel/il/mitzpe-ramon-youth-hostel.html',
   },
   {
@@ -132,6 +138,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 440,
     description: "סוויטה מפוארת מול חומות העיר העתיקה עם ג'קוזי פרטי ועיצוב מזרחי ייחודי.",
+    description_en: 'Lavish suite facing the Old City walls with a private jacuzzi and unique oriental design.',
     url: 'https://www.21floorhotel.com/',
   },
   {
@@ -142,6 +149,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 410,
     description: 'סוויטה מפנקת עם גישה ישירה לחוף ים המלח, טיפולי ספא כלולים ומרפסת פרטית עם נוף ירדן.',
+    description_en: 'Pampering suite with direct access to the Dead Sea beach, spa treatments included and a private balcony with Jordan views.',
     url: 'https://www.lothotel.com/',
   },
   {
@@ -152,6 +160,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 850,
     description: "פנטהאוז יוקרתי עם בריכה פרטית על הגג ונוף 360° לים התיכון. עיצוב אדריכלי מרהיב, שרות קונסיירז'.",
+    description_en: 'Luxury penthouse with a private rooftop pool and 360° Mediterranean views. Stunning architecture with concierge service.',
     url: 'https://www.airbnb.com/rooms/25159305',
   },
   {
@@ -162,6 +171,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 750,
     description: 'פנטהאוז מודרני ליד שדה הגולף ומהרומן ההיסטורי של קיסריה. שרות אישי ומרפסת עם נוף לים.',
+    description_en: 'Modern penthouse near the golf course and the historic ruins of Caesarea. Personal service and a terrace with sea views.',
     url: 'https://www.airbnb.com/rooms/15983768',
   },
   {
@@ -172,6 +182,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 1800,
     description: 'וילה פרטית מפוארת בלב הגליל: בריכה, 5 חדרי שינה, גינה ירוקה ויער. מושלם לאירועים ומשפחות.',
+    description_en: 'Magnificent private villa in the heart of the Galilee: pool, 5 bedrooms, lush garden and forest. Perfect for events and families.',
     url: 'https://www.airbnb.com/eastern-upper-galilee-israel/stays/villas',
   },
   {
@@ -182,6 +193,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 1650,
     description: 'וילה יוקרתית ישירות על הים עם בריכה מחוממת, 4 חדרי שינה ויציאה פרטית לחוף חולי מושלם.',
+    description_en: 'Luxury villa directly on the sea with a heated pool, 4 bedrooms and a private entrance to a perfect sandy beach.',
     url: 'https://www.airbnb.com/rooms/938761621123676466',
   },
   {
@@ -192,6 +204,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 240,
     description: 'אחד המקומות הפופולריים ביותר בתל אביב לטיילים. אווירה תוססת, בר ברחבה וחדרים נוחים במחיר מצוין.',
+    description_en: "One of Tel Aviv's most popular hostels. Vibrant atmosphere, courtyard bar and comfortable rooms at a great price.",
     url: 'https://abrahamhostels.com/tel-aviv/',
   },
   {
@@ -202,6 +215,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 310,
     description: 'אחוזה ערבית בת 200 שנה בלב הרובע הנוצרי של נצרת. קירות אבן, תקרות קמרונות ואווירה ייחודית.',
+    description_en: "A 200-year-old Arab mansion in the heart of Nazareth's Christian Quarter. Stone walls, vaulted ceilings and a unique atmosphere.",
     url: 'https://www.fauziazarinn.com/',
   },
   {
@@ -212,6 +226,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 265,
     description: 'הקיבוץ ההיסטורי הראשון בישראל. לינה על שפת הכנרת, גינות מטופחות ובריכה.',
+    description_en: "Israel's first historic kibbutz. Stay on the shores of the Sea of Galilee with manicured gardens and a pool.",
     url: 'https://www.booking.com/hotel/il/ginosar-inn-country-lodging.html',
   },
   {
@@ -222,6 +237,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 370,
     description: 'שוכנת בתוך שמורת הטבע של עין גדי, 10 דקות ממצדה. ארוחת בוקר בופה כלולה ובריכת שחייה.',
+    description_en: 'Nestled inside the Ein Gedi nature reserve, 10 minutes from Masada. Buffet breakfast included and a swimming pool.',
     url: 'https://www.booking.com/hotel/il/ein-gedi.html',
   },
   {
@@ -232,6 +248,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 390,
     description: 'מלון רשת בינלאומי במיקום מרכזי על יד שוק הכרמל. חדרים מודרניים, נקיים ונוחים.',
+    description_en: 'International chain hotel in a central location near the Carmel Market. Modern, clean and comfortable rooms.',
     url: 'https://all.accor.com/hotel/8767/index.he.shtml',
   },
   {
@@ -242,6 +259,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 220,
     description: 'מרחק הליכה משוק מחנה יהודה ושער יפו. בר גג פנורמי, אירועי תרבות כל ערב וחדרים לכל כיס.',
+    description_en: 'Walking distance from Machane Yehuda Market and Jaffa Gate. Panoramic rooftop bar, nightly cultural events and rooms for every budget.',
     url: 'https://abrahamhostels.com/jerusalem/',
   },
   {
@@ -252,6 +270,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 430,
     description: 'סוויטה בקיבוץ מלון ישירות על חוף הים התיכון. שרידי עיר פיניקית עתיקה, בריכה וחוף פרטי לאורחים.',
+    description_en: 'Suite at a kibbutz hotel directly on the Mediterranean coast. Ancient Phoenician ruins, pool and private beach for guests.',
     url: 'https://www.booking.com/hotel/il/nachsholim.html',
   },
   {
@@ -262,6 +281,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 415,
     description: 'ערד נחשבת לעיר עם האוויר הנקי ביותר בישראל. סוויטת ספא עם נוף למדבר, 30 דקות ממצדה.',
+    description_en: "Arad has Israel's cleanest air. Spa suite with desert views, 30 minutes from Masada.",
     url: 'https://www.booking.com/hotel/il/yehelim-boutique.html',
   },
   {
@@ -272,6 +292,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 445,
     description: 'סוויטה ממש על הטיילת עם נוף לים סוף ולהרי אדום. כולל גישה לבריכה, ספא וארוחת בוקר מפנקת.',
+    description_en: 'Suite right on the promenade with Red Sea and Edom Mountain views. Includes pool access, spa and a lavish breakfast.',
     url: 'https://www.booking.com/hotel/il/almog-eilat.html',
   },
   {
@@ -282,6 +303,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 870,
     description: "ריזורט הכל-כלול המוביל של אילת עם גישה ל-7 בריכות. פנטהאוז עם מרפסת פרטית, ג'קוזי ונוף לשמורת האלמוגים.",
+    description_en: "Eilat's leading all-inclusive resort with access to 7 pools. Penthouse with a private terrace, jacuzzi and coral reef views.",
     url: 'https://www.leonardo-hotels.co.il/he/eilat/leonardo-club-eilat',
   },
   {
@@ -292,6 +314,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 940,
     description: 'פנטהאוז בלעדי בריזורט הגולף של דן קיסריה. מגרש גולף בינלאומי ורצועת חוף מרהיבה צמודים.',
+    description_en: 'Exclusive penthouse at the Dan Caesarea Golf Resort. An international golf course and a stunning beach stretch right next door.',
     url: 'https://www.danhotels.com/caesareahotels',
   },
   {
@@ -302,6 +325,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 1720,
     description: 'וילה מפנקת עם נוף להר חרמון. בריכה מחוממת, 4 חדרי שינה, מרפסת ענקית ויין מיקב שכן.',
+    description_en: 'Luxurious villa with views of Mount Hermon. Heated pool, 4 bedrooms, a huge terrace and wine from a neighboring winery.',
     url: 'https://www.airbnb.com/rooms/17362818',
   },
   {
@@ -312,6 +336,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 1480,
     description: 'וילה כפרית בין כרמי ענבים וגנים, 40 דקות מתל אביב. גינה ים-תיכונית, בריכה ו-3 חדרי שינה.',
+    description_en: 'Rural villa among vineyards and gardens, 40 minutes from Tel Aviv. Mediterranean garden, pool and 3 bedrooms.',
     url: 'https://www.airbnb.com/judean-foothills-israel/stays/villas',
   },
 
@@ -325,6 +350,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 340,
     description: 'מלון בוטיק קסום בעיר המיסטית צפת עם נוף לגליל ואווירה רוחנית ייחודית. חדרים מוקפדים עם אבן גלילית וחצר פנימית.',
+    description_en: 'Enchanting boutique hotel in the mystical city of Safed with Galilee views. Rooms crafted from Galilean stone with an inner courtyard.',
     url: 'https://www.booking.com/hotel/il/inn-of-safed.html',
   },
   {
@@ -335,6 +361,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 395,
     description: 'מלון ישירות על הקליף מעל חוף הים בנתניה. נוף פנורמי לים התיכון, בריכה ומרחק הליכה ממרכז העיר.',
+    description_en: "Hotel directly on the cliff above Netanya's beach. Panoramic Mediterranean views, pool and walking distance to the city center.",
     url: 'https://www.booking.com/hotel/il/neptune-netanya.html',
   },
   {
@@ -345,6 +372,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 275,
     description: "בית הארחה בלב העיר העתיקה של עכו, אתר מורשת עולמי של יונסק\"ו. קירות צלבניים, חצר פרטית ואווירה היסטורית.",
+    description_en: "Guest house in the heart of Acre's Old City, a UNESCO World Heritage Site. Crusader walls, private courtyard and a historic atmosphere.",
     url: 'https://www.booking.com/hotel/il/arabesque-acre.html',
   },
   {
@@ -355,6 +383,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 410,
     description: 'צימר חמים ליד המנהרות המפורסמות של ראש הנקרה. נוף לים התיכון ולחוף הלבנוני, שקט מוחלט ואוויר ים.',
+    description_en: 'Cozy cabin near the famous grottos of Rosh Hanikra. Views of the Mediterranean and Lebanese coast, complete tranquility and sea air.',
     url: 'https://www.booking.com/hotel/il/rosh-hanikra-kibbutz.html',
   },
   {
@@ -365,6 +394,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 330,
     description: 'אכסניית מורשת בלב מושבת הרוטשילד ההיסטורית. רחוב הנדיב, כרמים ויקבים על הר הכרמל עם ארוחת בוקר ביתית.',
+    description_en: 'Heritage inn in the heart of the historic Rothschild colony. Vineyards and wineries on Mount Carmel with a homemade breakfast.',
     url: 'https://www.booking.com/hotel/il/baron-zichron-yaakov.html',
   },
   {
@@ -375,6 +405,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 435,
     description: "סוויטה מפנקת בבניין עות'מאני משוחזר ברובע האמנים של צפת. פטיו פרטי, נרות ואובייקטי אמנות מקוריים.",
+    description_en: "Pampering suite in a restored Ottoman building in Safed's Artists Quarter. Private patio, candlelight and original artworks.",
     url: 'https://www.booking.com/hotel/il/rimon-inn-safed.html',
   },
   {
@@ -385,6 +416,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 400,
     description: 'סוויטה מודרנית מול הים עם ספא פרטי ונוף עוצר נשימה לים התיכון. קרוב לנמל אשדוד ולאיילון מול.',
+    description_en: 'Modern suite facing the sea with a private spa and a breathtaking Mediterranean view. Close to Ashdod Port and Ayalon Mall.',
     url: 'https://www.booking.com/hotel/il/herods-ashdod-hotel.html',
   },
   {
@@ -395,6 +427,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 445,
     description: 'סוויטה מפוארת ישירות על שפת הכנרת בקיבוץ גינוסר. בריכת אינפיניטי עם נוף לכנרת וסירת מנוע לאורחים.',
+    description_en: 'Magnificent suite directly on the Sea of Galilee at Kibbutz Ginosar. Infinity pool with lake views and a motorboat for guests.',
     url: 'https://www.nof-ginosar.co.il/',
   },
   {
@@ -405,6 +438,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 780,
     description: 'פנטהאוז מרהיב על צוק הים בנתניה עם מרפסת ענקית מול ים התיכון. 3 חדרי שינה, מטבח מלא ועיצוב יוקרתי.',
+    description_en: "Stunning penthouse on Netanya's sea cliff with a huge terrace facing the Mediterranean. 3 bedrooms, full kitchen and luxury design.",
     url: 'https://www.airbnb.com/rooms/34521987',
   },
   {
@@ -415,6 +449,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 890,
     description: 'פנטהאוז מעוצב בשכונת הכרמל התיכון עם נוף ל-180° על המפרץ, הנמל ורכבל הכרמל. גג פרטי ובריכת שמש.',
+    description_en: 'Stylishly designed penthouse in Central Carmel with 180° views of the bay, harbor and Carmel cable car. Private rooftop sun pool.',
     url: 'https://www.airbnb.com/rooms/43129876',
   },
   {
@@ -425,6 +460,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 920,
     description: 'פנטהאוז אקולוגי בלב הערבה מול הרי אדום. חוויה שמיימית ייחודית עם בריכת שמש, ספא ושתיקת מדבר.',
+    description_en: 'Ecological penthouse in the heart of the Arava desert facing the Edom Mountains. Unique stargazing experience with a sun pool and spa.',
     url: 'https://www.airbnb.com/rooms/29847561',
   },
   {
@@ -435,6 +471,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 1690,
     description: 'וילה יוקרתית בין כרמי ענבים של זיכרון יעקב עם בריכה, 4 חדרים ונוף לים התיכון. כולל סיור יקב פרטי.',
+    description_en: 'Luxury villa among the vineyards of Zichron Yaakov with a pool, 4 rooms and Mediterranean views. Includes a private winery tour.',
     url: 'https://www.airbnb.com/rooms/22938451',
   },
   {
@@ -445,6 +482,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 1880,
     description: 'וילה פרטית מפנקת עם גישה לחוף ים המלח ובריכה מינרלית. 3 חדרי שינה, ספא פרטי ועיצוב מדברי-מודרני.',
+    description_en: 'Private luxury villa with access to the Dead Sea beach and a mineral pool. 3 bedrooms, private spa and modern desert design.',
     url: 'https://www.airbnb.com/rooms/51234789',
   },
   {
@@ -455,6 +493,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 1590,
     description: 'וילה כפרית בין פרחי הגולן ויקב שכן. בריכה מחוממת, 4 חדרים ונוף להר חרמון ובקעת החולה.',
+    description_en: 'Rural villa among Golan wildflowers near a neighboring winery. Heated pool, 4 rooms and views of Mount Hermon and the Hula Valley.',
     url: 'https://www.airbnb.com/rooms/18274635',
   },
   {
@@ -465,6 +504,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 1950,
     description: 'וילה פרטית עם נוף לים סוף ולהרי ירדן ומצרים. בריכה מחוממת, 5 חדרים, מגרש טניס וחוף פרטי.',
+    description_en: 'Private villa with Red Sea views and the mountains of Jordan and Egypt. Heated pool, 5 rooms, tennis court and a private beach.',
     url: 'https://www.airbnb.com/rooms/67812345',
   },
 
@@ -479,6 +519,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 280,
     description: 'חדר זוגי פרטי באחד ההוסטלים הכי מדורגים בתל אביב. בר גג פנורמי, אירועי תרבות כל ערב ואווירה קהילתית שוקקת.',
+    description_en: "Private double room at one of Tel Aviv's top-rated hostels. Panoramic rooftop bar, nightly cultural events and a buzzing community vibe.",
     url: 'https://www.booking.com/hotel/il/abraham-hostel-tel-aviv.html',
   },
   {
@@ -489,6 +530,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 350,
     description: 'דירת 2 חדרים חדשה עם נוף ישיר לים המלח. 5 דקות מהחוף, חצי שעה מעין גדי ומצדה. מדורג 4.92 כוכבים.',
+    description_en: 'New 2-bedroom apartment with a direct view of the Dead Sea. 5 minutes from the beach, 30 minutes from Ein Gedi and Masada. Rated 4.92 stars.',
     url: 'https://www.airbnb.com/rooms/17129473',
   },
 
@@ -501,6 +543,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 850,
     description: 'פנטהאוז יוקרתי עם מעלית פרטית לסלון ועיצוב בהשראת ארמון מרוקאי. צעדים מהים. מדורג 4.94 כוכבים, 176 ביקורות.',
+    description_en: 'Luxury penthouse with a private elevator to the living room and Moroccan palace-inspired design. Steps from the sea. Rated 4.94 stars, 176 reviews.',
     url: 'https://www.airbnb.com/rooms/19904504',
   },
   {
@@ -511,6 +554,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 780,
     description: 'פנטהאוז ייחודי ברובע יפו ההיסטורי עם אווירה בלתי נשכחת ונוף לגגות העיר העתיקה. מדורג 4.97 כוכבים.',
+    description_en: 'Unique penthouse in the historic Jaffa Quarter with an unforgettable atmosphere and rooftop views over the ancient city. Rated 4.97 stars.',
     url: 'https://www.airbnb.com/rooms/534074',
   },
   {
@@ -521,6 +565,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 920,
     description: 'פנטהאוז 3 חדרי שינה על שדרות בן גוריון התוססת. מרפסת מרווחת עם שולחן אוכל, עיצוב מודרני, עד 6 אורחים.',
+    description_en: '3-bedroom penthouse on vibrant Ben Gurion Boulevard. Spacious dining terrace, modern design, sleeps up to 6 guests.',
     url: 'https://www.airbnb.com/rooms/48456209',
   },
   {
@@ -531,6 +576,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 680,
     description: 'פנטהאוז מודרני עם ריהוט אירופאי יוקרתי, מזרנים אורתופדיים, WiFi וחנייה חינם. קפה איטלקי וסבון צרפתי כלולים.',
+    description_en: 'Modern penthouse with luxury European furnishings, orthopedic mattresses, WiFi and free parking. Italian coffee and French soap included.',
     url: 'https://www.airbnb.com/rooms/1219876683734267374',
   },
 
@@ -543,6 +589,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 1750,
     description: 'וילה עם בריכה פרטית בשכונה משפחתית שקטה, 5 דקות הליכה מחופי ים סוף. עד 6 אורחים. מדורג 4.96 כוכבים.',
+    description_en: 'Villa with a private pool in a quiet family neighborhood, 5-minute walk to the Red Sea beaches. Sleeps up to 6. Rated 4.96 stars.',
     url: 'https://www.airbnb.com/rooms/19298922',
   },
   {
@@ -553,6 +600,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 1450,
     description: 'וילה 4 חדרים עם שתי מרפסות ומצפה לנוף המדבר היהודי וים המלח. ספא, ארוחת בוקר ושירות איסוף אישי. 25 דקות מים המלח.',
+    description_en: '4-bedroom villa with two terraces overlooking the Judean Desert and the Dead Sea. Spa, breakfast and personal pickup. 25 minutes from the Dead Sea.',
     url: 'https://www.airbnb.com/rooms/45095573',
   },
   {
@@ -563,6 +611,7 @@ export const RAW_DEALS: RawDeal[] = [
     is_in_israel: true,
     price_per_night_ils: 1380,
     description: 'וילה מעוצבת בצפון ים המלח עם גינה ירוקה 300 מ"ר, בריכת קיץ ו-3 חדרי שינה. נוף להרים ולים המלח. מדורג 4.9 כוכבים.',
+    description_en: 'Designer villa in the north Dead Sea with a 300 sqm green garden, summer pool and 3 bedrooms. Mountain and sea views. Rated 4.9 stars.',
     url: 'https://www.airbnb.com/rooms/1191197232357241359',
   },
 
@@ -800,6 +849,7 @@ export function filterDeals(rawDeals: RawDeal[]): FilterResult {
       location: deal.location,
       price_per_night_ils: deal.price_per_night_ils,
       description: deal.description,
+      description_en: deal.description_en,
       url: deal.url,
     });
   }

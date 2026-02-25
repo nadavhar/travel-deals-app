@@ -214,7 +214,7 @@ export default function Home() {
               <DealCard
                 key={deal.id}
                 deal={deal}
-                t={{ perNight: t.perNight, limitLabel: t.limitLabel, savings: t.savings, bookNow: t.bookNow }}
+                t={{ perNight: t.perNight, limitLabel: t.limitLabel, savings: t.savings, bookNow: t.bookNow, lang }}
                 catLabel={catLabel}
               />
             ))}
@@ -242,7 +242,7 @@ export default function Home() {
 // ─────────────────────────────────────────────────────────────────────────────
 // DEAL CARD
 // ─────────────────────────────────────────────────────────────────────────────
-type CardT = { perNight: string; limitLabel: string; savings: string; bookNow: string };
+type CardT = { perNight: string; limitLabel: string; savings: string; bookNow: string; lang: Lang };
 
 function DealCard({
   deal,
@@ -255,6 +255,8 @@ function DealCard({
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgSrc, setImgSrc]       = useState(() => getLocationImage(deal.location));
+
+  const description = t.lang === 'EN' && deal.description_en ? deal.description_en : deal.description;
 
   const limit      = BUDGET_LIMITS[deal.category];
   const savings    = limit - deal.price_per_night_ils;
@@ -319,7 +321,7 @@ function DealCard({
 
         {/* Row 3 — Description */}
         <p className="mb-3 line-clamp-2 text-sm leading-relaxed text-gray-500">
-          {deal.description}
+          {description}
         </p>
 
         {/* Row 4 — Price + CTA */}
