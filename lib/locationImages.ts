@@ -14,18 +14,24 @@ const WMF  = 'https://upload.wikimedia.org/wikipedia/commons';   // full-size (n
 // ─── Verified image pools ─────────────────────────────────────────────────────
 
 const EILAT_POOL = [
-  `${WM}/5/5a/Eilat_night_hotels_2016.jpg/1200px-Eilat_night_hotels_2016.jpg`,
+  `${WMF}/f/f4/Eilat_panorama_3.jpg`,
+  `${WMF}/a/a9/Eilat_and_Aqaba_across_the_Red_Sea.jpg`,
+  `${WMF}/0/0b/PikiWiki_Israel_8094_the_marina_in_eilat.jpg`,
   `${WMF}/b/b3/Eilat_panorama_2.jpg`,
-  `${WMF}/c/ce/North_Beach_Eilat.jpg`,
 ];
 
 const TEL_AVIV_POOL = [
-  `${WM}/6/69/Sarona_CBD_01_%28cropped%29.jpg/1200px-Sarona_CBD_01_%28cropped%29.jpg`,
-  `${WM}/a/a3/ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg/1200px-ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg`,
+  `${WMF}/9/9e/Central_Tel_Aviv_beaches_and_Jaffa_on_the_background_%289869221525%29.jpg`,
+  `${WMF}/8/83/Central_Tel_Aviv_beaches_and_Old_Jaffa_on_the_background_%289869881475%29.jpg`,
+  `${WMF}/6/6d/Israel_Tel_Aviv_Skyline_%2834714425090%29.jpg`,
+  `${WMF}/f/f5/Skyline_of_Tel_Aviv_by_night.jpg`,
+  `${WMF}/7/7a/Gordon_Beach_Tel_Aviv.jpg`,
 ];
 
 const JERUSALEM_POOL = [
-  `${WM}/9/94/%D7%94%D7%9E%D7%A6%D7%95%D7%93%D7%94_%D7%91%D7%9C%D7%99%D7%9C%D7%94.jpg/1200px-%D7%94%D7%9E%D7%A6%D7%95%D7%93%D7%94_%D7%91%D7%9C%D7%99%D7%9C%D7%94.jpg`,
+  `${WMF}/4/4b/Jerusalem_panorama_from_Mount_of_Olives_07112018.jpg`,
+  `${WMF}/f/f6/View_of_Jerusalem_from_Mount_of_Olives_02.jpg`,
+  `${WMF}/c/c8/Jerusalem-2013%282%29-View_of_the_Dome_of_the_Rock_%26_Temple_Mount_02.jpg`,
   `${WMF}/2/22/Jerusalem_Old_city_panorama.jpg`,
   `${WMF}/3/38/Jerusalem_panorama_view_from_Mt._Scopus.jpg`,
 ];
@@ -43,10 +49,10 @@ const CAESAREA_POOL = [
 ];
 
 const NETANYA_POOL = [
+  `${WMF}/1/13/Netanya_Beach_Promende_-_aerial_view.jpg`,
   `${WMF}/d/da/Beach_of_Netanya.jpg`,
   `${WMF}/9/91/Beaches_of_Netanya_P1080866.JPG`,
-  `${WMF}/c/c2/Beaches_of_Netanya_P1080873.JPG`,
-  `${WMF}/b/bd/PikiWiki_Israel_15855_Oved_Ben-Ami_Boulevard_in_Netanya_Beach_Promenade.JPG`,
+  `${WMF}/9/9c/96964_netanya_at_night_-_south_direction_PikiWiki_Israel.jpg`,
 ];
 
 const ZICHRON_POOL = [
@@ -64,27 +70,29 @@ const ROSH_HANIKRA_POOL = [
 ];
 
 const AKKO_POOL = [
-  `${WMF}/e/e1/Akko_from_far.jpg`,
-  `${WMF}/1/1d/Akko_Bay_and_Pisan_Harbor_1149_%28509700145%29.jpg`,
-  `${WMF}/3/3c/Atlit_and_Haifa_bay_aerial.jpg`,
+  `${WMF}/7/7f/View_over_Akko_%28Acre%29_from_Old_City_Walls_-_Akko_-_Israel_%285693252457%29.jpg`,
+  `${WMF}/5/51/Mediterranean_Sea_off_Old_City_Walls_-_Akko_%28Acre%29_-_Israel_%285693364475%29.jpg`,
+  `${WMF}/5/5e/Akko_Sea_wall_and_harbor_%2815168386539%29.jpg`,
+  `${WMF}/1/1b/Akko%2C_Israel_%2816036319790%29.jpg`,
 ];
 
 const ASHKELON_POOL = [
-  `${WMF}/8/8d/92286_bar_kochba_beach_PikiWiki_Israel.jpg`,
+  `${WMF}/2/2c/Ashkelon%2C_Israel_-_panoramio.jpg`,
+  `${WMF}/6/62/PikiWiki_Israel_20323_Ashkelon.jpg`,
   `${WMF}/8/85/92288_ashkelon_beach_breakwaters_PikiWiki_Israel.jpg`,
-  `${WMF}/6/60/Ashkelon_%282935055087%29.jpg`,
 ];
 
 const ASHDOD_POOL = [
-  `${WMF}/9/91/102887_ashdod_beach_PikiWiki_Israel.jpg`,
+  `${WMF}/e/ea/Israel_Port_of_Ashdod_%286683140759%29.jpg`,
+  `${WMF}/8/82/Ashdod%2C_Israel_-_panoramio_%284%29.jpg`,
+  `${WMF}/4/4e/121388_ashdod_statue_PikiWiki_Israel.jpg`,
   `${WMF}/1/14/Ashdod_Beach.jpg`,
-  `${WMF}/3/3a/AshdodBeachLine.jpg`,
 ];
 
 const HERZLIYA_POOL = [
-  `${WM}/a/a3/ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg/1200px-ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg`,
+  `${WMF}/9/9e/Central_Tel_Aviv_beaches_and_Jaffa_on_the_background_%289869221525%29.jpg`,
   `${WMF}/7/77/Ancient_Roman_aqueduct_in_Caesarea_Maritima_DSC05187.JPG`,
-  `${WM}/6/69/Sarona_CBD_01_%28cropped%29.jpg/1200px-Sarona_CBD_01_%28cropped%29.jpg`,
+  `${WMF}/6/6d/Israel_Tel_Aviv_Skyline_%2834714425090%29.jpg`,
 ];
 
 const GOLAN_POOL = [
@@ -97,15 +105,23 @@ const GOLAN_POOL = [
 
 const KINNERET_POOL = [
   `${WM}/f/f7/Kinneret_cropped.jpg/1200px-Kinneret_cropped.jpg`,
-  `${WMF}/7/74/117291_the_kinneret_area_PikiWiki_Israel.jpg`,
+  `${WMF}/4/41/Tiberias_city_in_the_Israel..JPG`,
+  `${WMF}/c/c4/PikiWiki_Israel_64870_tiberias%2C_waterfront.jpg`,
+  `${WMF}/e/e1/PikiWiki_Israel_64861_tiberias_from_the_west.jpg`,
   `${WMF}/8/8e/141151_sea_of_galilee_PikiWiki_Israel.jpg`,
-  `${WMF}/d/d3/20161020_174813_October_2016_in_Israel.jpg`,
-  `${WMF}/b/b8/A_fishing_boat_on_Lake_Kinneret_%28FL45731763%29.jpg`,
+];
+
+const TZFAT_POOL = [
+  `${WMF}/a/ac/Safed1.jpg`,
+  `${WMF}/f/f8/Safed_2009.jpg`,
+  `${WMF}/f/f1/Safed_street.jpg`,
+  `${WMF}/e/ee/Tzfat_Old_City_2172.jpg`,
 ];
 
 const NORTH_POOL = [
+  `${WMF}/0/0d/PikiWiki_Israel_51454_panorama_of_the_city_of_nazareth.jpg`,
+  `${WMF}/3/31/127790_nazareth-urban_landscape_PikiWiki_Israel.jpg`,
   `${WM}/9/9a/Banias_-_Temple_of_Pan_001.jpg/1200px-Banias_-_Temple_of_Pan_001.jpg`,
-  `${WM}/3/3e/Nazareth_Panorama_Dafna_Tal_IMOT_%2814532097313%29.jpg/1200px-Nazareth_Panorama_Dafna_Tal_IMOT_%2814532097313%29.jpg`,
   `${WMF}/4/43/Golan_Heights_5.JPG`,
 ];
 
@@ -149,7 +165,7 @@ export const LOCATION_IMAGE_MAP: Record<string, string[]> = {
   'הרצליה':       HERZLIYA_POOL,
   'נחשולים':      CAESAREA_POOL,
   'ערד':          DEFAULT_POOL,
-  'צפת':          NORTH_POOL,
+  'צפת':          TZFAT_POOL,
   'ראש פינה':     NORTH_POOL,
   'בת ים':        TEL_AVIV_POOL,
   'אשקלון':       ASHKELON_POOL,
