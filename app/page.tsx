@@ -50,10 +50,10 @@ const T = {
     bookNow:      'להזמנה',
     footerTagline:'חופשה חכמה · ישראל בלבד',
     budgets: [
-      { label: '🏨 ≤ 450 ₪',   cls: 'bg-sky-900/60 text-sky-300' },
-      { label: '🛏️ ≤ 450 ₪',  cls: 'bg-purple-900/60 text-purple-300' },
-      { label: '🌆 ≤ 990 ₪',   cls: 'bg-amber-900/60 text-amber-300' },
-      { label: '🏡 ≤ 1,990 ₪', cls: 'bg-emerald-900/60 text-emerald-300' },
+      { label: 'חופשה ≤ 450 ₪',   cls: 'bg-sky-900/60 text-sky-300' },
+      { label: 'סוויטה ≤ 450 ₪',  cls: 'bg-purple-900/60 text-purple-300' },
+      { label: 'פנטהאוז ≤ 990 ₪', cls: 'bg-amber-900/60 text-amber-300' },
+      { label: 'וילה ≤ 1,990 ₪',  cls: 'bg-emerald-900/60 text-emerald-300' },
     ],
   },
   EN: {
@@ -72,10 +72,10 @@ const T = {
     bookNow:      'Book Now',
     footerTagline:'Smart vacations · Israel only',
     budgets: [
-      { label: '🏨 ≤ ₪450',   cls: 'bg-sky-900/60 text-sky-300' },
-      { label: '🛏️ ≤ ₪450',  cls: 'bg-purple-900/60 text-purple-300' },
-      { label: '🌆 ≤ ₪990',   cls: 'bg-amber-900/60 text-amber-300' },
-      { label: '🏡 ≤ ₪1,990', cls: 'bg-emerald-900/60 text-emerald-300' },
+      { label: 'Vacation ≤ ₪450',   cls: 'bg-sky-900/60 text-sky-300' },
+      { label: 'Suite ≤ ₪450',      cls: 'bg-purple-900/60 text-purple-300' },
+      { label: 'Penthouse ≤ ₪990',  cls: 'bg-amber-900/60 text-amber-300' },
+      { label: 'Villa ≤ ₪1,990',    cls: 'bg-emerald-900/60 text-emerald-300' },
     ],
   },
 } satisfies Record<Lang, unknown>;
