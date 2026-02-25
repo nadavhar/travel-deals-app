@@ -169,9 +169,9 @@ export default function Home() {
 
         {/* ── Filter pills ─────────────────────────────────────────────────── */}
         <div className="mx-auto max-w-5xl">
-          <div className="flex justify-center overflow-x-auto px-4 py-3 [&::-webkit-scrollbar]:hidden"
+          <div className="overflow-x-auto py-3 [&::-webkit-scrollbar]:hidden"
                style={{ scrollbarWidth: 'none' }}>
-            <div className="flex gap-3">
+            <div className="mx-auto flex w-max gap-3 px-4">
               {FILTER_TABS.map((tab) => {
                 const count =
                   tab.category === null
