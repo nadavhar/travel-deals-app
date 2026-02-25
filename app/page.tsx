@@ -226,21 +226,32 @@ export default function Home() {
       </div>
 
       {/* ══════════════════════════════════════════════════════════ FOOTER */}
-      <footer className="relative mt-10 overflow-hidden bg-slate-900 px-4 pb-12 pt-14 text-center">
-        {/* Subtle gradient backdrop */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-        <div className="relative">
-          <p className="text-4xl">🏖️</p>
-          <p className="mt-4 text-xl font-black tracking-tighter text-white">{t.appName}</p>
-          <p className="mt-1.5 text-sm text-slate-400">{t.footerTagline}</p>
-          <div className="mt-6 flex flex-wrap justify-center gap-2 text-xs">
-            {t.budgets.map((b) => (
-              <span key={b.label} className={`rounded-full px-3.5 py-1.5 font-semibold ring-1 ring-white/5 ${b.cls}`}>
-                {b.label}
-              </span>
-            ))}
-          </div>
+      <footer className="relative mt-10 bg-slate-900 px-4 pb-12 pt-10 text-center">
+
+        {/* Terracotta top accent line */}
+        <div className="absolute inset-x-0 top-0 h-[3px] bg-orange-600" />
+
+        {/* Compass icon */}
+        <div className="flex justify-center">
+          <Compass className="h-8 w-8 text-orange-500" strokeWidth={1.5} />
+        </div>
+
+        {/* App name */}
+        <p className="mt-3 text-xl font-black tracking-tight text-white">{t.appName}</p>
+
+        {/* Tagline */}
+        <p className="mt-1.5 text-sm text-slate-400">{t.footerTagline}</p>
+
+        {/* Divider */}
+        <div className="mx-auto mt-7 mb-6 w-16 border-t border-white/10" />
+
+        {/* Budget category pills */}
+        <div className="flex flex-wrap justify-center gap-2 text-xs">
+          {t.budgets.map((b) => (
+            <span key={b.label} className="rounded-full px-3.5 py-1.5 font-semibold text-slate-400 ring-1 ring-white/10">
+              {b.label}
+            </span>
+          ))}
         </div>
       </footer>
     </main>
