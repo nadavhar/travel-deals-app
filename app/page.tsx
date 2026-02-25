@@ -256,7 +256,9 @@ function DealCard({
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgSrc, setImgSrc]       = useState(() => getLocationImage(deal.location));
 
-  const description = t.lang === 'EN' && deal.description_en ? deal.description_en : deal.description;
+  const description    = t.lang === 'EN' && deal.description_en    ? deal.description_en    : deal.description;
+  const propertyName   = t.lang === 'EN' && deal.property_name_en  ? deal.property_name_en  : deal.property_name;
+  const locationLabel  = t.lang === 'EN' && deal.location_en        ? deal.location_en        : deal.location;
 
   const limit      = BUDGET_LIMITS[deal.category];
   const savings    = limit - deal.price_per_night_ils;
@@ -308,7 +310,7 @@ function DealCard({
 
         {/* Row 1 — Property name */}
         <h2 className="mb-1 line-clamp-1 text-[15px] font-bold leading-snug text-gray-900">
-          {deal.property_name}
+          {propertyName}
         </h2>
 
         {/* Row 2 — Location */}
@@ -316,7 +318,7 @@ function DealCard({
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5 shrink-0 text-gray-400">
             <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
           </svg>
-          <span className="line-clamp-1">{deal.location}</span>
+          <span className="line-clamp-1">{locationLabel}</span>
         </div>
 
         {/* Row 3 — Description */}
