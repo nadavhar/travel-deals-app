@@ -11,10 +11,25 @@ import {
   type Category,
   type Deal,
 } from '@/lib/deals';
-import { getLocationImage, LOCATION_IMAGE_MAP } from '@/lib/locationImages';
+import { getLocationImage, getLocationKey, LOCATION_IMAGE_MAP } from '@/lib/locationImages';
 
 // ─── Filter once at module level ─────────────────────────────────────────────
 const { validDeals } = filterDeals(RAW_DEALS);
+
+// ─── Pre-compute one image per deal using sequential per-location slots ───────
+// Each location group cycles through its pool: deal 1→slot 0, deal 2→slot 1, …
+// This guarantees variety without any randomness (stable on SSR + hydration).
+const DEAL_IMAGES: Map<number, string> = (() => {
+  const map = new Map<number, string>();
+  const counters = new Map<string, number>();
+  for (const deal of validDeals) {
+    const key = getLocationKey(deal.location);
+    const slot = counters.get(key) ?? 0;
+    map.set(deal.id, getLocationImage(deal.location, slot));
+    counters.set(key, slot + 1);
+  }
+  return map;
+})();
 
 // ─── Translations ─────────────────────────────────────────────────────────────
 type Lang = 'HE' | 'EN';
@@ -256,7 +271,7 @@ function DealCard({
   catLabel: Record<Category, string>;
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [imgSrc, setImgSrc]       = useState(() => getLocationImage(deal.location, deal.id));
+  const [imgSrc, setImgSrc]       = useState(() => DEAL_IMAGES.get(deal.id) ?? FALLBACK_IMG);
 
   const description   = t.lang === 'EN' && deal.description_en   ? deal.description_en   : deal.description;
   const propertyName  = t.lang === 'EN' && deal.property_name_en ? deal.property_name_en : deal.property_name;

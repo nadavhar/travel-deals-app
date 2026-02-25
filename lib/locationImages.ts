@@ -1,34 +1,33 @@
 /**
  * Location-based landscape image pools.
  *
- * All URLs are verified Wikimedia Commons CDN images (HTTP 200).
- * Each location has a pool; getLocationImage() picks one deterministically
- * using a seed (deal.id) so SSR and client hydration always agree.
+ * All URLs are verified Wikimedia Commons images (HTTP 200).
+ * Each pool contains only geographically appropriate images.
  *
  * Keys are ordered specific → general so substring matching picks
  * the most precise match first.
  */
 
-const WM = 'https://upload.wikimedia.org/wikipedia/commons/thumb';
+const WM   = 'https://upload.wikimedia.org/wikipedia/commons/thumb';
+const WMF  = 'https://upload.wikimedia.org/wikipedia/commons';   // full-size (no thumb path needed)
 
 // ─── Verified image pools ─────────────────────────────────────────────────────
 
 const EILAT_POOL = [
   `${WM}/5/5a/Eilat_night_hotels_2016.jpg/1200px-Eilat_night_hotels_2016.jpg`,
-  `${WM}/6/6f/Dead_Sea_beach_00.JPG/1200px-Dead_Sea_beach_00.JPG`,        // Red Sea beach feel
-  `${WM}/a/a3/ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg/1200px-ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg`,
+  `${WMF}/b/b3/Eilat_panorama_2.jpg`,
+  `${WMF}/c/ce/North_Beach_Eilat.jpg`,
 ];
 
 const TEL_AVIV_POOL = [
   `${WM}/6/69/Sarona_CBD_01_%28cropped%29.jpg/1200px-Sarona_CBD_01_%28cropped%29.jpg`,
   `${WM}/a/a3/ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg/1200px-ISR-2013-Aerial-Jaffa-Port_of_Jaffa.jpg`,
-  `${WM}/3/3e/Nazareth_Panorama_Dafna_Tal_IMOT_%2814532097313%29.jpg/1200px-Nazareth_Panorama_Dafna_Tal_IMOT_%2814532097313%29.jpg`,
 ];
 
 const JERUSALEM_POOL = [
   `${WM}/9/94/%D7%94%D7%9E%D7%A6%D7%95%D7%93%D7%94_%D7%91%D7%9C%D7%99%D7%9C%D7%94.jpg/1200px-%D7%94%D7%9E%D7%A6%D7%95%D7%93%D7%94_%D7%91%D7%9C%D7%99%D7%9C%D7%94.jpg`,
-  `${WM}/a/a1/MakhteshRamonMar262022_01.jpg/1200px-MakhteshRamonMar262022_01.jpg`,
-  `${WM}/d/d2/NahalHavarimNov212022_03.jpg/1200px-NahalHavarimNov212022_03.jpg`,
+  `${WMF}/2/22/Jerusalem_Old_city_panorama.jpg`,
+  `${WMF}/3/38/Jerusalem_panorama_view_from_Mt._Scopus.jpg`,
 ];
 
 const NORTH_POOL = [
@@ -41,14 +40,13 @@ const NORTH_POOL = [
 
 const DEAD_SEA_POOL = [
   `${WM}/6/6f/Dead_Sea_beach_00.JPG/1200px-Dead_Sea_beach_00.JPG`,
-  `${WM}/a/a1/MakhteshRamonMar262022_01.jpg/1200px-MakhteshRamonMar262022_01.jpg`,
-  `${WM}/d/d2/NahalHavarimNov212022_03.jpg/1200px-NahalHavarimNov212022_03.jpg`,
+  `${WMF}/c/c7/119593_sunrise_over_the_dead_sea_PikiWiki_Israel.jpg`,
+  `${WMF}/e/ed/Salt_pillar_at_the_Dead_Sea%2C_Israel_%2835253925685%29.jpg`,
 ];
 
 const DEFAULT_POOL = [
   `${WM}/a/a1/MakhteshRamonMar262022_01.jpg/1200px-MakhteshRamonMar262022_01.jpg`,
   `${WM}/d/d2/NahalHavarimNov212022_03.jpg/1200px-NahalHavarimNov212022_03.jpg`,
-  `${WM}/f/f7/Kinneret_cropped.jpg/1200px-Kinneret_cropped.jpg`,
 ];
 
 // ─── Keyword → pool mapping ───────────────────────────────────────────────────
@@ -102,15 +100,23 @@ export const LOCATION_IMAGE_MAP: Record<string, string[]> = {
 };
 
 /**
+ * Returns the first keyword in LOCATION_IMAGE_MAP that matches `location`,
+ * or 'default' if nothing matches. Used to group deals by their image pool.
+ */
+export function getLocationKey(location: string): string {
+  for (const keyword of Object.keys(LOCATION_IMAGE_MAP)) {
+    if (keyword !== 'default' && location.includes(keyword)) {
+      return keyword;
+    }
+  }
+  return 'default';
+}
+
+/**
  * Returns a landscape image URL for a given Israeli location string.
  *
- * The `seed` (typically deal.id) deterministically picks from the pool so
- * SSR and client hydration always render the same image — no hydration mismatch.
- *
- * @example
- *   getLocationImage('יפו, תל אביב', 3)  // → TEL_AVIV_POOL[3 % 3]
- *   getLocationImage('גליל עליון', 7)     // → NORTH_POOL[7 % 5]
- *   getLocationImage('באר שבע', 0)        // → DEFAULT_POOL[0 % 3]
+ * The `seed` picks deterministically from the pool — pass a per-location
+ * sequential counter so each deal in the same location gets a different image.
  */
 export function getLocationImage(location: string, seed: number = 0): string {
   for (const [keyword, pool] of Object.entries(LOCATION_IMAGE_MAP)) {
