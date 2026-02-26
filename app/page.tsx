@@ -275,7 +275,7 @@ export default function Home() {
 
                   {profileOpen && (
                     <div
-                      className="absolute left-0 top-11 z-50 w-60 overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/[0.07]"
+                      className="absolute right-0 top-11 z-50 w-60 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/[0.07]"
                       dir="rtl"
                     >
                       {/* User identity */}
