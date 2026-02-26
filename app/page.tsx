@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Image from 'next/image';
-import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight, Share2, Check } from 'lucide-react';
+import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight, Share2, Check, Search } from 'lucide-react';
 import {
   filterDeals,
   RAW_DEALS,
@@ -40,14 +40,15 @@ const T = {
     suite:        'סוויטה',
     penthouse:    'פנטהאוז',
     villa:        'וילה',
-    noDeals:      'לא נמצאו דילים',
-    noDealsHint:  'נסה לבחור קטגוריה אחרת',
     perNight:     '/ לילה',
     limitLabel:   'מגבלה',
     savings:      'חיסכון',
-    bookNow:      'להזמנה',
-    publishDeal:  'פרסם דיל +',
-    footerTagline:'חופשה חכמה · ישראל בלבד',
+    bookNow:        'להזמנה',
+    publishDeal:    'פרסם דיל +',
+    searchPlaceholder: 'חפש מקום, עיר או תיאור...',
+    noDeals:        'לא נמצאו דילים',
+    noDealsHint:    'נסה לבחור קטגוריה אחרת',
+    footerTagline:  'חופשה חכמה · ישראל בלבד',
     budgets: [
       { label: 'חופשה ≤ 450 ₪',   cls: 'bg-sky-900/60 text-sky-300' },
       { label: 'סוויטה ≤ 450 ₪',  cls: 'bg-purple-900/60 text-purple-300' },
@@ -63,14 +64,15 @@ const T = {
     suite:        'Suite',
     penthouse:    'Penthouse',
     villa:        'Villa',
-    noDeals:      'No deals found',
-    noDealsHint:  'Try a different category',
     perNight:     '/ night',
     limitLabel:   'Limit',
     savings:      'savings',
-    bookNow:      'Book Now',
-    publishDeal:  'Publish Deal +',
-    footerTagline:'Smart vacations · Israel only',
+    bookNow:        'Book Now',
+    publishDeal:    'Publish Deal +',
+    searchPlaceholder: 'Search place, city or description...',
+    noDeals:        'No deals found',
+    noDealsHint:    'Try a different category',
+    footerTagline:  'Smart vacations · Israel only',
     budgets: [
       { label: 'Vacation ≤ ₪450',   cls: 'bg-sky-900/60 text-sky-300' },
       { label: 'Suite ≤ ₪450',      cls: 'bg-purple-900/60 text-purple-300' },
@@ -113,6 +115,7 @@ export default function Home() {
   const [deals, setDeals]                       = useState<Deal[]>(INITIAL_DEALS);
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [toast, setToast]                       = useState<string | null>(null);
+  const [searchQuery, setSearchQuery]           = useState('');
 
   const t = T[lang];
 
@@ -125,10 +128,15 @@ export default function Home() {
     penthouse: t.penthouse, villa: t.villa,
   };
 
-  const filteredDeals =
-    activeFilter === 'all'
-      ? deals
-      : deals.filter((d) => d.category === activeFilter);
+  const q = searchQuery.trim().toLowerCase();
+  const filteredDeals = deals
+    .filter((d) => activeFilter === 'all' || d.category === activeFilter)
+    .filter((d) =>
+      !q ||
+      d.property_name.toLowerCase().includes(q) ||
+      d.location.toLowerCase().includes(q) ||
+      d.description.toLowerCase().includes(q)
+    );
 
   function handlePublish(deal: Deal) {
     setDeals((prev) => [deal, ...prev]);
@@ -180,6 +188,28 @@ export default function Home() {
 
         {/* ── Divider ──────────────────────────────────────────────────────── */}
         <div className="border-b border-gray-200" />
+
+        {/* ── Search bar ───────────────────────────────────────────────────── */}
+        <div className="mx-auto max-w-5xl px-4 pb-3">
+          <div className="relative" dir="rtl">
+            <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t.searchPlaceholder}
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pr-9 pl-9 text-sm text-slate-800 placeholder-gray-400 outline-none transition focus:border-orange-400 focus:bg-white focus:ring-2 focus:ring-orange-100"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+        </div>
 
         {/* ── Filter pills ─────────────────────────────────────────────────── */}
         <div className="mx-auto max-w-5xl">
