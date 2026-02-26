@@ -389,7 +389,8 @@ function PublishModal({
     budgetLimit !== null && !isNaN(priceNum) && priceNum > budgetLimit
       ? `מחיר חורג מהמגבלה — מקסימום ${budgetLimit.toLocaleString('he-IL')} ₪`
       : null;
-  const urlError = url !== '' && !url.startsWith('https://');
+  const trimmedUrl = url.trim();
+  const urlError = trimmedUrl !== '' && !trimmedUrl.startsWith('https://');
 
   // Strip formatting chars, then require 9–13 digits (covers Israeli 0X-XXXXXXXX
   // and international +972-XX-XXXXXXX after stripping the +)
@@ -500,7 +501,6 @@ function PublishModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
         className="relative w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl"
@@ -562,13 +562,13 @@ function PublishModal({
           {/* ── Deal details ──── */}
           <div className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-slate-700">שם המקום</label>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">שם המקום <span className="text-red-400">*</span></label>
               <input type="text" value={propertyName} onChange={(e) => setPropertyName(e.target.value)}
                 placeholder="לדוגמה: וילת הכרמל" className={inputCls} required />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-slate-700">מיקום</label>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">מיקום <span className="text-red-400">*</span></label>
               <input type="text" value={location} onChange={(e) => setLocation(e.target.value)}
                 placeholder="לדוגמה: אילת, ירושלים" className={inputCls} required />
             </div>
@@ -582,7 +582,7 @@ function PublishModal({
 
             <div className="flex gap-3">
               <div className="flex-1">
-                <label className="mb-1.5 block text-sm font-semibold text-slate-700">קטגוריה</label>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">קטגוריה <span className="text-red-400">*</span></label>
                 <select value={category} onChange={(e) => setCategory(e.target.value as Category | '')}
                   className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100" required>
                   <option value="">בחר קטגוריה</option>
@@ -593,7 +593,7 @@ function PublishModal({
                 </select>
               </div>
               <div className="flex-1">
-                <label className="mb-1.5 block text-sm font-semibold text-slate-700">מחיר ללילה (₪)</label>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">מחיר ללילה (₪) <span className="text-red-400">*</span></label>
                 <input type="number" value={price} onChange={(e) => setPrice(e.target.value)}
                   placeholder={budgetLimit ? String(budgetLimit) : '450'} min="1"
                   className={`w-full rounded-xl border px-4 py-2.5 text-sm text-slate-900 placeholder-gray-400 outline-none transition focus:ring-2 ${
@@ -686,6 +686,23 @@ function PublishModal({
               </div>
             </div>
           </div>
+
+          {/* Validation hint — visible when form is partially filled but not yet valid */}
+          {!isValid && (propertyName || location || category || price || hostName || hostPhone) && (
+            <p className="mb-3 text-center text-xs text-orange-500">
+              {[
+                !propertyName.trim() && 'שם המקום',
+                !location.trim()     && 'מיקום',
+                !category            && 'קטגוריה',
+                (isNaN(priceNum) || priceNum <= 0) && 'מחיר ללילה',
+                priceError           && 'מחיר חורג מהמגבלה',
+                urlError             && 'קישור (חייב https://)',
+                !hostName.trim()     && 'שם המארח',
+                !hostPhone.trim()    && 'טלפון',
+                phoneError           && 'טלפון לא תקין',
+              ].filter(Boolean).join(' · ')}
+            </p>
+          )}
 
           {/* Submit */}
           <button type="submit" disabled={!isValid || isSubmitting}
