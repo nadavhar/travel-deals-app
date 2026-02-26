@@ -3,6 +3,7 @@ import OpenAI from 'openai';
 import { put } from '@vercel/blob';
 import { buildImagePrompt } from '@/lib/imagePrompt';
 import { BUDGET_LIMITS, type Category } from '@/lib/deals';
+import { createClient } from '@/lib/supabase/server';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 export const maxDuration = 60; // Vercel Pro max; covers DALL-E + upload
@@ -17,6 +18,13 @@ const FALLBACK_BY_CATEGORY: Record<Category, string> = {
 
 // ─── Route handler ────────────────────────────────────────────────────────────
 export async function POST(request: NextRequest) {
+  // ── Auth check ────────────────────────────────────────────────────────────
+  const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();
@@ -58,20 +66,46 @@ export async function POST(request: NextRequest) {
     console.error('[publish] Image generation failed, using fallback:', err);
   }
 
-  // ── Return complete deal object ───────────────────────────────────────────
+  // ── Persist deal to Supabase ──────────────────────────────────────────────
+  const { data: savedRow, error: dbError } = await supabase
+    .from('deals')
+    .insert({
+      user_id:             session.user.id,
+      category:            String(category),
+      property_name:       String(body.property_name ?? ''),
+      location:            String(location),
+      price_per_night_ils: price,
+      description:         String(description),
+      url:                 String(body.url ?? '#') || '#',
+      host_name:           String(body.hostName ?? ''),
+      host_phone:          String(body.hostPhone ?? ''),
+      host_email:          body.hostEmail ? String(body.hostEmail) : null,
+      amenities:           (amenities as string[]).length > 0 ? amenities : [],
+      image_url:           imageUrl,
+    })
+    .select()
+    .single();
+
+  if (dbError || !savedRow) {
+    console.error('[publish] DB insert error:', dbError);
+    return NextResponse.json({ error: 'Failed to save deal' }, { status: 500 });
+  }
+
+  // Map DB row → Deal shape for the client
   const deal = {
-    id:                  Date.now(),
-    category,
-    property_name:       String(body.property_name ?? ''),
-    location:            String(location),
-    price_per_night_ils: price,
-    description:         String(description),
-    url:                 String(body.url ?? '#') || '#',
-    hostName:            String(body.hostName ?? ''),
-    hostPhone:           String(body.hostPhone ?? ''),
-    hostEmail:           body.hostEmail ? String(body.hostEmail) : null,
-    amenities:           (amenities as string[]).length > 0 ? amenities : undefined,
-    imageUrl,
+    id:                  savedRow.id as number,
+    category:            savedRow.category,
+    property_name:       savedRow.property_name,
+    location:            savedRow.location,
+    price_per_night_ils: Number(savedRow.price_per_night_ils),
+    description:         savedRow.description,
+    url:                 savedRow.url,
+    hostName:            savedRow.host_name,
+    hostPhone:           savedRow.host_phone,
+    hostEmail:           savedRow.host_email ?? null,
+    amenities:           savedRow.amenities ?? [],
+    imageUrl:            savedRow.image_url ?? imageUrl,
+    userId:              savedRow.user_id,
   };
 
   return NextResponse.json({ deal }, { status: 201 });

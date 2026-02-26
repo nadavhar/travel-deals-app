@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect, useMemo, memo } from 'react';
 import Image from 'next/image';
-import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight, Share2, Check, Search, Phone } from 'lucide-react';
+import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight, Share2, Check, Search, Phone, LogIn } from 'lucide-react';
+import type { User } from '@supabase/supabase-js';
 import {
   filterDeals,
   RAW_DEALS,
@@ -11,6 +12,7 @@ import {
   type Deal,
 } from '@/lib/deals';
 import { getLocationImage, getLocationKey, LOCATION_IMAGE_MAP } from '@/lib/locationImages';
+import { createClient } from '@/lib/supabase/client';
 
 // ─── Filter once at module level ─────────────────────────────────────────────
 const { validDeals: INITIAL_DEALS } = filterDeals(RAW_DEALS);
@@ -117,11 +119,40 @@ export default function Home() {
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [toast, setToast]                       = useState<string | null>(null);
   const [searchQuery, setSearchQuery]           = useState('');
+  const [user, setUser]                         = useState<User | null>(null);
 
   // Track all blob URLs created for UGC deals so we can revoke them on unmount
   const blobUrlsRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     return () => { blobUrlsRef.current.forEach((u) => URL.revokeObjectURL(u)); };
+  }, []);
+
+  // ── Auth state + UGC deals fetch ────────────────────────────────────────
+  useEffect(() => {
+    const supabase = createClient();
+
+    // Get initial session
+    supabase.auth.getUser().then(({ data: { user: u } }) => setUser(u ?? null));
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Fetch persisted UGC deals and merge after static deals
+    fetch('/api/deals/public')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data: { deals?: Deal[] } | null) => {
+        if (!data?.deals?.length) return;
+        setDeals((prev) => {
+          // Avoid duplicates — UGC deals have a userId, static ones don't
+          const staticDeals = prev.filter((d) => !d.userId);
+          return [...staticDeals, ...data.deals!];
+        });
+      })
+      .catch(() => { /* non-critical — static deals still show */ });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const t = T[lang];
@@ -169,7 +200,8 @@ export default function Home() {
     // Register blob URLs for cleanup on page unmount
     deal.imageUrls?.forEach((u) => { if (u.startsWith('blob:')) blobUrlsRef.current.add(u); });
     if (deal.videoUrl?.startsWith('blob:')) blobUrlsRef.current.add(deal.videoUrl);
-    setDeals((prev) => [deal, ...prev]);
+    // Prepend the new deal; remove any previous optimistic copy with same id
+    setDeals((prev) => [deal, ...prev.filter((d) => d.id !== deal.id)]);
     setActiveFilter(deal.category); // Jump to the deal's category so it's immediately visible
     setSearchQuery('');             // Clear any active search that might hide it
     setShowPublishModal(false);
@@ -198,13 +230,41 @@ export default function Home() {
             <span>{t.switchLang}</span>
           </button>
 
-          {/* Publish Deal CTA — right (desktop only) */}
-          <button
-            onClick={() => setShowPublishModal(true)}
-            className="absolute right-4 top-5 hidden items-center gap-1 rounded-full border border-orange-500 px-3 py-1.5 text-sm font-semibold text-orange-600 transition-all hover:bg-orange-50 active:scale-95 md:flex"
-          >
-            {t.publishDeal}
-          </button>
+          {/* Right side: Publish + Auth (desktop only) */}
+          <div className="absolute right-4 top-5 hidden items-center gap-2 md:flex">
+            {user ? (
+              <>
+                <a
+                  href="/my-deals"
+                  className="flex items-center gap-1 rounded-full border border-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-600 transition-all hover:bg-gray-50 active:scale-95"
+                >
+                  הדילים שלי
+                </a>
+                <button
+                  onClick={() => setShowPublishModal(true)}
+                  className="flex items-center gap-1 rounded-full border border-orange-500 px-3 py-1.5 text-sm font-semibold text-orange-600 transition-all hover:bg-orange-50 active:scale-95"
+                >
+                  {t.publishDeal}
+                </button>
+              </>
+            ) : (
+              <>
+                <a
+                  href="/auth"
+                  className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-600 transition-all hover:bg-gray-50 active:scale-95"
+                >
+                  <LogIn className="h-3.5 w-3.5" />
+                  כניסה
+                </a>
+                <button
+                  onClick={() => setShowPublishModal(true)}
+                  className="flex items-center gap-1 rounded-full border border-orange-500 px-3 py-1.5 text-sm font-semibold text-orange-600 transition-all hover:bg-orange-50 active:scale-95"
+                >
+                  {t.publishDeal}
+                </button>
+              </>
+            )}
+          </div>
 
           {/* Logo */}
           <div className="flex items-center justify-center gap-2.5" dir="rtl">
@@ -293,7 +353,7 @@ export default function Home() {
           <div className="grid grid-cols-1 gap-4 p-3 sm:grid-cols-2 sm:gap-5 sm:p-5 lg:grid-cols-3 lg:gap-6 lg:p-6">
             {filteredDeals.map((deal) => (
               <DealCard
-                key={deal.id}
+                key={deal.userId ? `db-${deal.id}` : `static-${deal.id}`}
                 deal={deal}
                 t={cardT}
                 catLabel={catLabel}
@@ -451,8 +511,8 @@ function PublishModal({
 
     setIsSubmitting(true);
 
-    // ── Call API: AI image generation + permanent storage ──────────────────
-    let imageUrl: string | undefined;
+    // ── Call API: auth check + AI image + Supabase persist ────────────────
+    let savedDeal: Deal | null = null;
     try {
       const res = await fetch('/api/deals/publish', {
         method:  'POST',
@@ -472,16 +532,21 @@ function PublishModal({
       });
       if (res.ok) {
         const data = await res.json();
-        imageUrl = data.deal?.imageUrl ?? undefined;
+        savedDeal = data.deal ?? null;
+      } else if (res.status === 401) {
+        setIsSubmitting(false);
+        window.location.href = '/auth?next=/';
+        return;
       }
     } catch {
-      // Network failure — proceed without AI image (graceful degradation)
+      // Network failure — proceed without persistence (graceful degradation)
     } finally {
       setIsSubmitting(false);
     }
 
     onPublish({
-      id:                  Date.now(),
+      // Use DB-assigned id if available; fall back to timestamp for offline/error case
+      id:                  savedDeal?.id ?? Date.now(),
       category:            category as Category,
       property_name:       propertyName.trim(),
       location:            location.trim(),
@@ -494,7 +559,8 @@ function PublishModal({
       hostPhone:           hostPhone.trim(),
       hostEmail:           hostEmail.trim() || null,
       amenities:           amenities.length > 0 ? amenities : undefined,
-      imageUrl,
+      imageUrl:            savedDeal?.imageUrl,
+      userId:              savedDeal?.userId,
     });
   }
 
@@ -737,7 +803,15 @@ const DealCard = memo(function DealCard({
   catLabel: Record<Category, string>;
 }) {
   const [imgLoaded, setImgLoaded]     = useState(false);
-  const [imgSrc, setImgSrc]           = useState(() => DEAL_IMAGES.get(deal.id) ?? deal.imageUrl ?? FALLBACK_IMG);
+  const [imgSrc, setImgSrc]           = useState(() => (!deal.userId ? DEAL_IMAGES.get(deal.id) : undefined) ?? deal.imageUrl ?? FALLBACK_IMG);
+
+  // Sync imgSrc when a UGC deal's imageUrl changes (e.g. after user edits it)
+  useEffect(() => {
+    if (deal.userId) {
+      setImgSrc(deal.imageUrl ?? FALLBACK_IMG);
+      setImgLoaded(false);
+    }
+  }, [deal.imageUrl, deal.userId]);
   const [activeSlide, setActiveSlide] = useState(0);
   const [showVideo, setShowVideo]     = useState(false);
   const [shareFeedback, setShareFeedback] = useState(false);

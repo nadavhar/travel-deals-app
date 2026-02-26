@@ -45,6 +45,8 @@ export interface Deal {
   amenities?: string[];
   /** Permanent AI-generated image URL (Vercel Blob) or category fallback */
   imageUrl?:  string;
+  /** Supabase auth.users.id — present only on user-submitted deals */
+  userId?:    string;
 }
 
 export interface FilterResult {
