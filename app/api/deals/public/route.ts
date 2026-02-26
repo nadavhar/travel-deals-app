@@ -30,7 +30,7 @@ export async function GET() {
     hostEmail:           (row.host_email as string | null) ?? null,
     amenities:           (row.amenities as string[] | null) ?? [],
     imageUrl:            (row.image_url as string | null) ?? undefined,
-    userId:              row.user_id as string,
+    // user_id intentionally omitted — not needed by clients
   }));
 
   return NextResponse.json({ deals });
