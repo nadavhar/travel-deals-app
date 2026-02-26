@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo, memo } from 'react';
 import Image from 'next/image';
 import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight, Share2, Check, Search, Phone } from 'lucide-react';
 import {
@@ -43,12 +43,15 @@ const T = {
     perNight:     '/ לילה',
     limitLabel:   'מגבלה',
     savings:      'חיסכון',
-    bookNow:        'להזמנה',
-    publishDeal:    'פרסם דיל +',
-    searchPlaceholder: 'חפש מקום, עיר או תיאור...',
-    noDeals:        'לא נמצאו דילים',
-    noDealsHint:    'נסה לבחור קטגוריה אחרת',
-    footerTagline:  'חופשה חכמה · ישראל בלבד',
+    bookNow:            'להזמנה',
+    publishDeal:        'פרסם דיל +',
+    searchPlaceholder:  'חפש מקום, עיר או תיאור...',
+    noDeals:            'לא נמצאו דילים',
+    noDealsHint:        'נסה לבחור קטגוריה אחרת',
+    publishModalTitle:  'פרסם דיל חדש',
+    publishSubmit:      'פרסם דיל',
+    publishSuccess:     'הדיל פורסם בהצלחה!',
+    footerTagline:      'חופשה חכמה · ישראל בלבד',
     budgets: [
       { label: 'חופשה ≤ 450 ₪',   cls: 'bg-sky-900/60 text-sky-300' },
       { label: 'סוויטה ≤ 450 ₪',  cls: 'bg-purple-900/60 text-purple-300' },
@@ -67,12 +70,15 @@ const T = {
     perNight:     '/ night',
     limitLabel:   'Limit',
     savings:      'savings',
-    bookNow:        'Book Now',
-    publishDeal:    'Publish Deal +',
-    searchPlaceholder: 'Search place, city or description...',
-    noDeals:        'No deals found',
-    noDealsHint:    'Try a different category',
-    footerTagline:  'Smart vacations · Israel only',
+    bookNow:            'Book Now',
+    publishDeal:        'Publish Deal +',
+    searchPlaceholder:  'Search place, city or description...',
+    noDeals:            'No deals found',
+    noDealsHint:        'Try a different category',
+    publishModalTitle:  'Publish New Deal',
+    publishSubmit:      'Publish Deal',
+    publishSuccess:     'Deal published successfully!',
+    footerTagline:      'Smart vacations · Israel only',
     budgets: [
       { label: 'Vacation ≤ ₪450',   cls: 'bg-sky-900/60 text-sky-300' },
       { label: 'Suite ≤ ₪450',      cls: 'bg-purple-900/60 text-purple-300' },
@@ -125,24 +131,37 @@ export default function Home() {
 
   const t = T[lang];
 
-  const tabLabel: Record<string, string> = {
+  // Memoize label maps — only recompute when language changes
+  const tabLabel = useMemo<Record<string, string>>(() => ({
     all: t.all, vacation: t.vacation, suite: t.suite,
     penthouse: t.penthouse, villa: t.villa,
-  };
-  const catLabel: Record<Category, string> = {
+  }), [lang]); // eslint-disable-line react-hooks/exhaustive-deps
+  const catLabel = useMemo<Record<Category, string>>(() => ({
     vacation: t.vacation, suite: t.suite,
     penthouse: t.penthouse, villa: t.villa,
-  };
+  }), [lang]); // eslint-disable-line react-hooks/exhaustive-deps
+  const cardT = useMemo<CardT>(() => ({
+    perNight: t.perNight, limitLabel: t.limitLabel,
+    savings: t.savings, bookNow: t.bookNow, lang,
+  }), [lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const q = searchQuery.trim().toLowerCase();
-  const filteredDeals = deals
-    .filter((d) => activeFilter === 'all' || d.category === activeFilter)
-    .filter((d) =>
-      !q ||
+
+  // Deals filtered by search only (used for accurate pill counts)
+  const searchFilteredDeals = useMemo(() =>
+    !q ? deals : deals.filter((d) =>
       d.property_name.toLowerCase().includes(q) ||
       d.location.toLowerCase().includes(q) ||
       d.description.toLowerCase().includes(q)
-    );
+    ),
+  [deals, q]);
+
+  // Deals filtered by both search AND active category tab
+  const filteredDeals = useMemo(() =>
+    activeFilter === 'all'
+      ? searchFilteredDeals
+      : searchFilteredDeals.filter((d) => d.category === activeFilter),
+  [activeFilter, searchFilteredDeals]);
 
   function handlePublish(deal: Deal) {
     // Register blob URLs for cleanup on page unmount
@@ -150,7 +169,7 @@ export default function Home() {
     if (deal.videoUrl?.startsWith('blob:')) blobUrlsRef.current.add(deal.videoUrl);
     setDeals((prev) => [deal, ...prev]);
     setShowPublishModal(false);
-    setToast('הדיל פורסם בהצלחה!');
+    setToast(t.publishSuccess);
     setTimeout(() => setToast(null), 3500);
   }
 
@@ -230,8 +249,8 @@ export default function Home() {
               {FILTER_TABS.map((tab) => {
                 const count =
                   tab.category === null
-                    ? deals.length
-                    : deals.filter((d) => d.category === tab.category).length;
+                    ? searchFilteredDeals.length
+                    : searchFilteredDeals.filter((d) => d.category === tab.category).length;
                 const isActive = activeFilter === tab.id;
                 return (
                   <button
@@ -271,7 +290,7 @@ export default function Home() {
               <DealCard
                 key={deal.id}
                 deal={deal}
-                t={{ perNight: t.perNight, limitLabel: t.limitLabel, savings: t.savings, bookNow: t.bookNow, lang }}
+                t={cardT}
                 catLabel={catLabel}
               />
             ))}
@@ -302,6 +321,8 @@ export default function Home() {
         <PublishModal
           onClose={() => setShowPublishModal(false)}
           onPublish={handlePublish}
+          modalTitle={t.publishModalTitle}
+          submitLabel={t.publishSubmit}
         />
       )}
 
@@ -311,7 +332,7 @@ export default function Home() {
         className="fixed bottom-8 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#D05C3A] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(208,92,58,0.45)] transition-transform active:scale-95 md:hidden"
       >
         <span className="text-base font-bold leading-none">+</span>
-        <span>פרסם דיל</span>
+        <span>{t.publishSubmit}</span>
       </button>
 
       {/* ══════════════════════════════════════════════════════════ TOAST */}
@@ -336,9 +357,13 @@ interface MediaFile {
 function PublishModal({
   onClose,
   onPublish,
+  modalTitle,
+  submitLabel,
 }: {
   onClose: () => void;
   onPublish: (deal: Deal) => void;
+  modalTitle: string;
+  submitLabel: string;
 }) {
   const [propertyName, setPropertyName] = useState('');
   const [location, setLocation]         = useState('');
@@ -446,7 +471,7 @@ function PublishModal({
       >
         {/* ── Modal header ──── */}
         <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-3xl bg-white px-6 py-4 shadow-[0_1px_0_#f1f5f9]">
-          <h2 className="text-lg font-black text-slate-900">פרסם דיל חדש</h2>
+          <h2 className="text-lg font-black text-slate-900">{modalTitle}</h2>
           <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200">
             <X size={16} />
           </button>
@@ -627,7 +652,7 @@ function PublishModal({
           {/* Submit */}
           <button type="submit" disabled={!isValid}
             className="w-full rounded-xl bg-orange-600 py-3 text-sm font-black text-white shadow-sm transition-all hover:bg-orange-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40">
-            פרסם דיל
+            {submitLabel}
           </button>
         </form>
       </div>
@@ -640,7 +665,7 @@ function PublishModal({
 // ─────────────────────────────────────────────────────────────────────────────
 type CardT = { perNight: string; limitLabel: string; savings: string; bookNow: string; lang: Lang };
 
-function DealCard({
+const DealCard = memo(function DealCard({
   deal,
   t,
   catLabel,
@@ -918,4 +943,4 @@ function DealCard({
       )}
     </>
   );
-}
+});
