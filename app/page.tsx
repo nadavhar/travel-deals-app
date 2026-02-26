@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Image from 'next/image';
-import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight, Share2, Check, Search } from 'lucide-react';
+import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight, Share2, Check, Search, Phone } from 'lucide-react';
 import {
   filterDeals,
   RAW_DEALS,
@@ -334,6 +334,9 @@ function PublishModal({
   const [category, setCategory]         = useState<Category | ''>('');
   const [price, setPrice]               = useState('');
   const [url, setUrl]                   = useState('');
+  const [hostName, setHostName]         = useState('');
+  const [hostPhone, setHostPhone]       = useState('');
+  const [hostEmail, setHostEmail]       = useState('');
   const [mediaFiles, setMediaFiles]     = useState<MediaFile[]>([]);
   const [isDragging, setIsDragging]     = useState(false);
   const fileInputRef                    = useRef<HTMLInputElement>(null);
@@ -344,6 +347,7 @@ function PublishModal({
     budgetLimit !== null && !isNaN(priceNum) && priceNum > budgetLimit
       ? `מחיר חורג מהמגבלה — מקסימום ${budgetLimit.toLocaleString('he-IL')} ₪`
       : null;
+  const urlError = url !== '' && !url.startsWith('https://');
 
   const isValid =
     propertyName.trim() !== '' &&
@@ -351,7 +355,9 @@ function PublishModal({
     category !== '' &&
     !isNaN(priceNum) && priceNum > 0 &&
     !priceError &&
-    url.startsWith('https://');
+    !urlError &&
+    hostName.trim() !== '' &&
+    hostPhone.trim() !== '';
 
   function addFiles(files: File[]) {
     const next: MediaFile[] = files
@@ -371,17 +377,10 @@ function PublishModal({
     });
   }
 
-  function handleDragOver(e: React.DragEvent) {
-    e.preventDefault();
-    setIsDragging(true);
-  }
-  function handleDragLeave(e: React.DragEvent) {
-    e.preventDefault();
-    setIsDragging(false);
-  }
+  function handleDragOver(e: React.DragEvent) { e.preventDefault(); setIsDragging(true); }
+  function handleDragLeave(e: React.DragEvent) { e.preventDefault(); setIsDragging(false); }
   function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setIsDragging(false);
+    e.preventDefault(); setIsDragging(false);
     addFiles(Array.from(e.dataTransfer.files));
   }
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -392,7 +391,7 @@ function PublishModal({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!isValid || !category) return;
-    const imageUrls = mediaFiles.filter((m) => m.kind === 'image').map((m) => m.previewUrl);
+    const imageUrls  = mediaFiles.filter((m) => m.kind === 'image').map((m) => m.previewUrl);
     const videoEntry = mediaFiles.find((m) => m.kind === 'video');
     onPublish({
       id: Date.now(),
@@ -401,11 +400,16 @@ function PublishModal({
       location: location.trim(),
       price_per_night_ils: priceNum,
       description: description.trim(),
-      url,
+      url: url.trim() || '#',
       imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
       videoUrl: videoEntry?.previewUrl ?? null,
+      hostName:  hostName.trim(),
+      hostPhone: hostPhone.trim(),
+      hostEmail: hostEmail.trim() || null,
     });
   }
+
+  const inputCls = 'w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-slate-900 placeholder-gray-400 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100';
 
   return (
     <div
@@ -420,10 +424,7 @@ function PublishModal({
         {/* ── Modal header ──── */}
         <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-3xl bg-white px-6 py-4 shadow-[0_1px_0_#f1f5f9]">
           <h2 className="text-lg font-black text-slate-900">פרסם דיל חדש</h2>
-          <button
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200"
-          >
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200">
             <X size={16} />
           </button>
         </div>
@@ -437,33 +438,18 @@ function PublishModal({
             </label>
             <div
               className={`flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-4 py-8 text-center transition-all ${
-                isDragging
-                  ? 'border-orange-400 bg-orange-50'
-                  : 'border-gray-200 bg-gray-50 hover:border-orange-300 hover:bg-orange-50/40'
+                isDragging ? 'border-orange-400 bg-orange-50' : 'border-gray-200 bg-gray-50 hover:border-orange-300 hover:bg-orange-50/40'
               }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
+              onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
             >
               <div className={`rounded-full p-3 transition-colors ${isDragging ? 'bg-orange-100' : 'bg-white shadow-sm'}`}>
                 <Upload size={22} className={isDragging ? 'text-orange-500' : 'text-gray-400'} />
               </div>
-              <p className="text-sm font-medium text-gray-600">
-                {isDragging ? 'שחרר את הקבצים כאן' : 'גרור קבצים לכאן'}
-              </p>
+              <p className="text-sm font-medium text-gray-600">{isDragging ? 'שחרר את הקבצים כאן' : 'גרור קבצים לכאן'}</p>
               <p className="text-xs text-gray-400">או לחץ לבחירת תמונות ווידאו</p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*,video/*"
-                multiple
-                className="hidden"
-                onChange={handleFileChange}
-              />
+              <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleFileChange} />
             </div>
-
-            {/* Thumbnails */}
             {mediaFiles.length > 0 && (
               <div className="mt-3 grid grid-cols-4 gap-2">
                 {mediaFiles.map((m, i) => (
@@ -477,11 +463,8 @@ function PublishModal({
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={m.previewUrl} alt="" className="h-full w-full object-cover" />
                     )}
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); removeFile(i); }}
-                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
-                    >
+                    <button type="button" onClick={(e) => { e.stopPropagation(); removeFile(i); }}
+                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100">
                       <X size={10} />
                     </button>
                   </div>
@@ -490,57 +473,32 @@ function PublishModal({
             )}
           </div>
 
-          {/* ── Form fields ──── */}
+          {/* ── Deal details ──── */}
           <div className="space-y-4">
-
-            {/* Property Name */}
             <div>
               <label className="mb-1.5 block text-sm font-semibold text-slate-700">שם המקום</label>
-              <input
-                type="text"
-                value={propertyName}
-                onChange={(e) => setPropertyName(e.target.value)}
-                placeholder="לדוגמה: וילת הכרמל"
-                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-slate-900 placeholder-gray-400 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
-                required
-              />
+              <input type="text" value={propertyName} onChange={(e) => setPropertyName(e.target.value)}
+                placeholder="לדוגמה: וילת הכרמל" className={inputCls} required />
             </div>
 
-            {/* Location */}
             <div>
               <label className="mb-1.5 block text-sm font-semibold text-slate-700">מיקום</label>
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="לדוגמה: אילת, ירושלים"
-                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-slate-900 placeholder-gray-400 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
-                required
-              />
+              <input type="text" value={location} onChange={(e) => setLocation(e.target.value)}
+                placeholder="לדוגמה: אילת, ירושלים" className={inputCls} required />
             </div>
 
-            {/* Description */}
             <div>
               <label className="mb-1.5 block text-sm font-semibold text-slate-700">תיאור קצר</label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="תאר את המקום בקצרה..."
-                rows={2}
-                className="w-full resize-none rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-slate-900 placeholder-gray-400 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
-              />
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)}
+                placeholder="תאר את המקום בקצרה..." rows={2}
+                className="w-full resize-none rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-slate-900 placeholder-gray-400 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100" />
             </div>
 
-            {/* Category + Price */}
             <div className="flex gap-3">
               <div className="flex-1">
                 <label className="mb-1.5 block text-sm font-semibold text-slate-700">קטגוריה</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as Category | '')}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
-                  required
-                >
+                <select value={category} onChange={(e) => setCategory(e.target.value as Category | '')}
+                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100" required>
                   <option value="">בחר קטגוריה</option>
                   <option value="vacation">חופשה (≤ 450 ₪)</option>
                   <option value="suite">סוויטה (≤ 450 ₪)</option>
@@ -548,58 +506,71 @@ function PublishModal({
                   <option value="villa">וילה (≤ 1,990 ₪)</option>
                 </select>
               </div>
-
               <div className="flex-1">
                 <label className="mb-1.5 block text-sm font-semibold text-slate-700">מחיר ללילה (₪)</label>
-                <input
-                  type="number"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder={budgetLimit ? String(budgetLimit) : '450'}
-                  min="1"
+                <input type="number" value={price} onChange={(e) => setPrice(e.target.value)}
+                  placeholder={budgetLimit ? String(budgetLimit) : '450'} min="1"
                   className={`w-full rounded-xl border px-4 py-2.5 text-sm text-slate-900 placeholder-gray-400 outline-none transition focus:ring-2 ${
-                    priceError
-                      ? 'border-red-400 focus:border-red-400 focus:ring-red-100'
-                      : 'border-gray-200 focus:border-orange-400 focus:ring-orange-100'
-                  }`}
-                  required
-                />
-                {priceError && (
-                  <p className="mt-1 text-xs font-medium text-red-500">{priceError}</p>
-                )}
-                {budgetLimit && !priceError && (
-                  <p className="mt-1 text-xs text-gray-400">מקסימום: {budgetLimit.toLocaleString('he-IL')} ₪</p>
-                )}
+                    priceError ? 'border-red-400 focus:border-red-400 focus:ring-red-100' : 'border-gray-200 focus:border-orange-400 focus:ring-orange-100'
+                  }`} required />
+                {priceError && <p className="mt-1 text-xs font-medium text-red-500">{priceError}</p>}
+                {budgetLimit && !priceError && <p className="mt-1 text-xs text-gray-400">מקסימום: {budgetLimit.toLocaleString('he-IL')} ₪</p>}
               </div>
             </div>
 
-            {/* URL */}
+            {/* URL — optional when host phone provided */}
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-slate-700">קישור להזמנה</label>
-              <input
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                קישור להזמנה <span className="font-normal text-gray-400">(אופציונלי)</span>
+              </label>
+              <input type="url" value={url} onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://www.booking.com/..."
                 className={`w-full rounded-xl border px-4 py-2.5 text-sm text-slate-900 placeholder-gray-400 outline-none transition focus:ring-2 ${
-                  url && !url.startsWith('https://')
-                    ? 'border-red-400 focus:border-red-400 focus:ring-red-100'
-                    : 'border-gray-200 focus:border-orange-400 focus:ring-orange-100'
-                }`}
-                required
-              />
-              {url && !url.startsWith('https://') && (
-                <p className="mt-1 text-xs font-medium text-red-500">הקישור חייב להתחיל ב-https://</p>
-              )}
+                  urlError ? 'border-red-400 focus:border-red-400 focus:ring-red-100' : 'border-gray-200 focus:border-orange-400 focus:ring-orange-100'
+                }`} />
+              {urlError && <p className="mt-1 text-xs font-medium text-red-500">הקישור חייב להתחיל ב-https://</p>}
+            </div>
+          </div>
+
+          {/* ── Host Contact Section ──── */}
+          <div className="my-6">
+            <div className="mb-4 flex items-center gap-3">
+              <hr className="flex-1 border-gray-200" />
+              <span className="shrink-0 text-xs font-semibold uppercase tracking-wider text-gray-400">פרטי המארח / יצירת קשר</span>
+              <hr className="flex-1 border-gray-200" />
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  שם המארח <span className="text-red-400">*</span>
+                </label>
+                <input type="text" value={hostName} onChange={(e) => setHostName(e.target.value)}
+                  placeholder="לדוגמה: יוסי כהן" className={inputCls} required />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  טלפון / וואטסאפ <span className="text-red-400">*</span>
+                </label>
+                <input type="tel" value={hostPhone} onChange={(e) => setHostPhone(e.target.value)}
+                  placeholder="050-1234567" className={inputCls} required />
+                <p className="mt-1 text-xs text-gray-400">יוצג כפתורי וואטסאפ ושיחה ישירה על הדיל</p>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  אימייל <span className="font-normal text-gray-400">(אופציונלי)</span>
+                </label>
+                <input type="email" value={hostEmail} onChange={(e) => setHostEmail(e.target.value)}
+                  placeholder="host@example.com" className={inputCls} />
+              </div>
             </div>
           </div>
 
           {/* Submit */}
-          <button
-            type="submit"
-            disabled={!isValid}
-            className="mt-6 w-full rounded-xl bg-orange-600 py-3 text-sm font-black text-white shadow-sm transition-all hover:bg-orange-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-          >
+          <button type="submit" disabled={!isValid}
+            className="w-full rounded-xl bg-orange-600 py-3 text-sm font-black text-white shadow-sm transition-all hover:bg-orange-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40">
             פרסם דיל
           </button>
         </form>
@@ -792,6 +763,13 @@ function DealCard({
             {description}
           </p>
 
+          {/* Host label */}
+          {deal.hostName && (
+            <p className="mb-2.5 text-xs text-gray-400">
+              מארח/ת: <span className="font-semibold text-slate-600">{deal.hostName}</span>
+            </p>
+          )}
+
           <div className="flex items-end justify-between gap-3">
             <div>
               <div className="flex items-baseline gap-1">
@@ -818,17 +796,44 @@ function DealCard({
                 }
               </button>
 
-              <a
-                href={deal.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex shrink-0 items-center gap-1.5 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-orange-500 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.97] active:shadow-none"
-              >
-                {t.bookNow}
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="h-3.5 w-3.5 opacity-80">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                </svg>
-              </a>
+              {deal.hostPhone ? (
+                /* ── Host deal: WhatsApp + Phone ── */
+                <>
+                  <a
+                    href={`https://wa.me/${deal.hostPhone.replace(/[\s\-().+]/g, '')}?text=${encodeURIComponent(`היי ${deal.hostName}, הגעתי דרך צייד הדילים. רציתי לשאול לגבי ${propertyName}...`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="WhatsApp"
+                    className="flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[#25D366] px-4 text-sm font-bold text-white shadow-sm transition-all hover:bg-green-500 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.97]"
+                  >
+                    {/* WhatsApp logo */}
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 shrink-0">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    וואטסאפ
+                  </a>
+                  <a
+                    href={`tel:${deal.hostPhone.replace(/[\s\-().]/g, '')}`}
+                    aria-label="התקשר"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition-all hover:border-slate-400 hover:bg-slate-50 hover:text-slate-700 active:scale-95"
+                  >
+                    <Phone size={16} />
+                  </a>
+                </>
+              ) : (
+                /* ── Scraped deal: standard Book Now ── */
+                <a
+                  href={deal.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex shrink-0 items-center gap-1.5 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-orange-500 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.97] active:shadow-none"
+                >
+                  {t.bookNow}
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="h-3.5 w-3.5 opacity-80">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                  </svg>
+                </a>
+              )}
             </div>
           </div>
         </div>

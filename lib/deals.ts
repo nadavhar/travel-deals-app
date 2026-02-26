@@ -37,6 +37,10 @@ export interface Deal {
   imageUrls?: string[];
   /** UGC: local blob URL for uploaded video */
   videoUrl?: string | null;
+  /** UGC host contact — present only on host-published deals */
+  hostName?:  string;
+  hostPhone?: string;
+  hostEmail?: string | null;
 }
 
 export interface FilterResult {
