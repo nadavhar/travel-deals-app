@@ -8,6 +8,9 @@
   "functions": {
     "app/api/cron/validate-deals/route.ts": {
       "maxDuration": 60
+    },
+    "app/api/deals/publish/route.ts": {
+      "maxDuration": 60
     }
   }
 }

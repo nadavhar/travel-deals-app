@@ -380,6 +380,7 @@ function PublishModal({
   const [amenities, setAmenities]       = useState<string[]>([]);
   const [mediaFiles, setMediaFiles]     = useState<MediaFile[]>([]);
   const [isDragging, setIsDragging]     = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef                    = useRef<HTMLInputElement>(null);
 
   const budgetLimit = category ? BUDGET_LIMITS[category as Category] : null;
@@ -438,25 +439,59 @@ function PublishModal({
     e.target.value = '';
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!isValid || !category) return;
+    if (!isValid || !category || isSubmitting) return;
+
     const imageUrls  = mediaFiles.filter((m) => m.kind === 'image').map((m) => m.previewUrl);
     const videoEntry = mediaFiles.find((m) => m.kind === 'video');
+
+    setIsSubmitting(true);
+
+    // ── Call API: AI image generation + permanent storage ──────────────────
+    let imageUrl: string | undefined;
+    try {
+      const res = await fetch('/api/deals/publish', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category,
+          property_name:       propertyName.trim(),
+          location:            location.trim(),
+          price_per_night_ils: priceNum,
+          description:         description.trim(),
+          url:                 url.trim(),
+          hostName:            hostName.trim(),
+          hostPhone:           hostPhone.trim(),
+          hostEmail:           hostEmail.trim() || null,
+          amenities,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        imageUrl = data.deal?.imageUrl ?? undefined;
+      }
+    } catch {
+      // Network failure — proceed without AI image (graceful degradation)
+    } finally {
+      setIsSubmitting(false);
+    }
+
     onPublish({
-      id: Date.now(),
-      category: category as Category,
-      property_name: propertyName.trim(),
-      location: location.trim(),
+      id:                  Date.now(),
+      category:            category as Category,
+      property_name:       propertyName.trim(),
+      location:            location.trim(),
       price_per_night_ils: priceNum,
-      description: description.trim(),
-      url: url.trim() || '#',
-      imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
-      videoUrl: videoEntry?.previewUrl ?? null,
-      hostName:  hostName.trim(),
-      hostPhone: hostPhone.trim(),
-      hostEmail: hostEmail.trim() || null,
-      amenities: amenities.length > 0 ? amenities : undefined,
+      description:         description.trim(),
+      url:                 url.trim() || '#',
+      imageUrls:           imageUrls.length > 0 ? imageUrls : undefined,
+      videoUrl:            videoEntry?.previewUrl ?? null,
+      hostName:            hostName.trim(),
+      hostPhone:           hostPhone.trim(),
+      hostEmail:           hostEmail.trim() || null,
+      amenities:           amenities.length > 0 ? amenities : undefined,
+      imageUrl,
     });
   }
 
@@ -653,9 +688,14 @@ function PublishModal({
           </div>
 
           {/* Submit */}
-          <button type="submit" disabled={!isValid}
-            className="w-full rounded-xl bg-orange-600 py-3 text-sm font-black text-white shadow-sm transition-all hover:bg-orange-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40">
-            {submitLabel}
+          <button type="submit" disabled={!isValid || isSubmitting}
+            className="w-full rounded-xl bg-orange-600 py-3 text-sm font-black text-white shadow-sm transition-all hover:bg-orange-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">
+            {isSubmitting ? (
+              <span className="flex items-center justify-center gap-2.5">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                מייצר תמונה עם AI...
+              </span>
+            ) : submitLabel}
           </button>
         </form>
       </div>
@@ -678,7 +718,7 @@ const DealCard = memo(function DealCard({
   catLabel: Record<Category, string>;
 }) {
   const [imgLoaded, setImgLoaded]     = useState(false);
-  const [imgSrc, setImgSrc]           = useState(() => DEAL_IMAGES.get(deal.id) ?? FALLBACK_IMG);
+  const [imgSrc, setImgSrc]           = useState(() => DEAL_IMAGES.get(deal.id) ?? deal.imageUrl ?? FALLBACK_IMG);
   const [activeSlide, setActiveSlide] = useState(0);
   const [showVideo, setShowVideo]     = useState(false);
   const [shareFeedback, setShareFeedback] = useState(false);

@@ -43,6 +43,8 @@ export interface Deal {
   hostEmail?: string | null;
   /** UGC amenities selected by the host */
   amenities?: string[];
+  /** Permanent AI-generated image URL (Vercel Blob) or category fallback */
+  imageUrl?:  string;
 }
 
 export interface FilterResult {
