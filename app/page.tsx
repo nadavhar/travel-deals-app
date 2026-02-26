@@ -170,6 +170,8 @@ export default function Home() {
     deal.imageUrls?.forEach((u) => { if (u.startsWith('blob:')) blobUrlsRef.current.add(u); });
     if (deal.videoUrl?.startsWith('blob:')) blobUrlsRef.current.add(deal.videoUrl);
     setDeals((prev) => [deal, ...prev]);
+    setActiveFilter(deal.category); // Jump to the deal's category so it's immediately visible
+    setSearchQuery('');             // Clear any active search that might hide it
     setShowPublishModal(false);
     setToast(t.publishSuccess);
     setTimeout(() => setToast(null), 3500);
