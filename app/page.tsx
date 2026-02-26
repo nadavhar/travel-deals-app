@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect, useMemo, memo } from 'react';
 import Image from 'next/image';
-import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight, Share2, Check, Search, Phone, LogIn } from 'lucide-react';
-import type { User } from '@supabase/supabase-js';
+import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight, Share2, Check, Search, Phone, LogIn, ExternalLink, User } from 'lucide-react';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import {
   filterDeals,
   RAW_DEALS,
@@ -119,7 +119,8 @@ export default function Home() {
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [toast, setToast]                       = useState<string | null>(null);
   const [searchQuery, setSearchQuery]           = useState('');
-  const [user, setUser]                         = useState<User | null>(null);
+  const [user, setUser]                         = useState<SupabaseUser | null>(null);
+  const [selectedDeal, setSelectedDeal]         = useState<Deal | null>(null);
 
   // Track all blob URLs created for UGC deals so we can revoke them on unmount
   const blobUrlsRef = useRef<Set<string>>(new Set());
@@ -357,6 +358,7 @@ export default function Home() {
                 deal={deal}
                 t={cardT}
                 catLabel={catLabel}
+                onSelect={setSelectedDeal}
               />
             ))}
           </div>
@@ -399,6 +401,16 @@ export default function Home() {
         <span className="text-base font-bold leading-none">+</span>
         <span>{t.publishSubmit}</span>
       </button>
+
+      {/* ══════════════════════════════════════════════ DEAL DETAIL MODAL */}
+      {selectedDeal && (
+        <DealDetailModal
+          deal={selectedDeal}
+          catLabel={catLabel}
+          t={cardT}
+          onClose={() => setSelectedDeal(null)}
+        />
+      )}
 
       {/* ══════════════════════════════════════════════════════════ TOAST */}
       {toast && (
@@ -797,10 +809,12 @@ const DealCard = memo(function DealCard({
   deal,
   t,
   catLabel,
+  onSelect,
 }: {
   deal: Deal;
   t: CardT;
   catLabel: Record<Category, string>;
+  onSelect: (deal: Deal) => void;
 }) {
   const [imgLoaded, setImgLoaded]     = useState(false);
   const [imgSrc, setImgSrc]           = useState(() => (!deal.userId ? DEAL_IMAGES.get(deal.id) : undefined) ?? deal.imageUrl ?? FALLBACK_IMG);
@@ -847,17 +861,20 @@ const DealCard = memo(function DealCard({
 
   function prev(e: React.MouseEvent) {
     e.preventDefault();
+    e.stopPropagation();
     setActiveSlide((i) => (i - 1 + totalSlides) % totalSlides);
   }
   function next(e: React.MouseEvent) {
     e.preventDefault();
+    e.stopPropagation();
     setActiveSlide((i) => (i + 1) % totalSlides);
   }
 
   return (
     <>
       <article
-        className={`group flex flex-col overflow-hidden rounded-2xl bg-white
+        onClick={() => onSelect(deal)}
+        className={`group flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-white
           shadow-[0_2px_8px_rgba(0,0,0,0.06),0_0_1px_rgba(0,0,0,0.04)]
           ring-1 ring-black/[0.05]
           transition-all duration-300
@@ -1007,7 +1024,7 @@ const DealCard = memo(function DealCard({
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
               {/* Share button */}
               <button
                 onClick={handleShare}
@@ -1030,7 +1047,6 @@ const DealCard = memo(function DealCard({
                     aria-label="WhatsApp"
                     className="flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[#25D366] px-4 text-sm font-bold text-white shadow-sm transition-all hover:bg-green-500 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.97]"
                   >
-                    {/* WhatsApp logo */}
                     <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 shrink-0">
                       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                     </svg>
@@ -1093,3 +1109,241 @@ const DealCard = memo(function DealCard({
     </>
   );
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DEAL DETAIL MODAL
+// ─────────────────────────────────────────────────────────────────────────────
+const AMENITY_ICONS: Record<string, string> = {
+  'בריכה':            '🏊',
+  "ג'קוזי":           '🛁',
+  'חניה חינם':        '🅿️',
+  'WiFi':             '📶',
+  'מטבח מאובזר':     '🍳',
+  'מתאים לבעלי חיים':'🐾',
+  'מנגל':             '🍖',
+};
+
+function DealDetailModal({
+  deal,
+  catLabel,
+  t,
+  onClose,
+}: {
+  deal: Deal;
+  catLabel: Record<Category, string>;
+  t: CardT;
+  onClose: () => void;
+}) {
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  // Close on Escape
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose(); }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  // Prevent body scroll while open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  const description  = t.lang === 'EN' && deal.description_en   ? deal.description_en   : deal.description;
+  const propertyName = t.lang === 'EN' && deal.property_name_en ? deal.property_name_en : deal.property_name;
+  const locationLabel= t.lang === 'EN' && deal.location_en      ? deal.location_en      : deal.location;
+
+  const limit      = BUDGET_LIMITS[deal.category];
+  const savingsPct = Math.round(((limit - deal.price_per_night_ils) / limit) * 100);
+  const amenities  = deal.amenities ?? [];
+
+  // Hero images: prefer uploaded carousel, else single imageUrl, else fallback
+  const heroImages: string[] = deal.imageUrls && deal.imageUrls.length > 0
+    ? deal.imageUrls
+    : deal.imageUrl
+      ? [deal.imageUrl]
+      : [FALLBACK_IMG];
+  const totalSlides = heroImages.length;
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center"
+      onClick={onClose}
+    >
+      <div
+        className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl"
+        style={{ maxHeight: '95vh' }}
+        onClick={(e) => e.stopPropagation()}
+        dir="rtl"
+      >
+        {/* ── Hero image / carousel ──── */}
+        <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden bg-gray-100" dir="ltr">
+          {/* Sliding track */}
+          <div
+            className="flex h-full transition-transform duration-300 ease-in-out"
+            style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+          >
+            {heroImages.map((src, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={i}
+                src={src}
+                alt={propertyName}
+                referrerPolicy="no-referrer"
+                className="h-full w-full shrink-0 object-cover"
+              />
+            ))}
+          </div>
+
+          {/* Carousel nav */}
+          {totalSlides > 1 && (
+            <>
+              <button
+                onClick={() => setActiveSlide((i) => (i - 1 + totalSlides) % totalSlides)}
+                className="absolute left-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow backdrop-blur-sm transition hover:bg-white"
+              ><ChevronLeft size={18} /></button>
+              <button
+                onClick={() => setActiveSlide((i) => (i + 1) % totalSlides)}
+                className="absolute right-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow backdrop-blur-sm transition hover:bg-white"
+              ><ChevronRight size={18} /></button>
+              <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-1">
+                {heroImages.map((_, i) => (
+                  <button key={i} onClick={() => setActiveSlide(i)} className="p-1">
+                    <span className={`block h-1.5 rounded-full transition-all ${i === activeSlide ? 'w-5 bg-white' : 'w-1.5 bg-white/60'}`} />
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Overlays */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/50 to-transparent" />
+          {savingsPct > 0 && (
+            <span className="absolute right-3 top-3 rounded-full bg-orange-600 px-3 py-1 text-sm font-black text-white shadow">
+              -{savingsPct}%
+            </span>
+          )}
+          <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 shadow backdrop-blur-sm">
+            <span className={`h-1.5 w-1.5 rounded-full ${CAT_DOT[deal.category]}`} />
+            <span className="text-xs font-semibold text-slate-700">{catLabel[deal.category]}</span>
+          </div>
+
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            aria-label="סגור"
+            className="absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition hover:bg-black/60"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* ── Scrollable body ──── */}
+        <div className="flex-1 overflow-y-auto px-5 pb-36 pt-5 sm:px-7">
+
+          {/* Title + location */}
+          <h1 className="mb-1 text-2xl font-black leading-tight text-slate-900">{propertyName}</h1>
+          <div className="mb-4 flex items-center gap-1.5 text-sm text-gray-500">
+            <MapPin className="h-4 w-4 shrink-0 text-orange-500" strokeWidth={2} />
+            <span>{locationLabel}</span>
+          </div>
+
+          {/* Description */}
+          {description && (
+            <div className="mb-6">
+              <h2 className="mb-2 text-sm font-bold uppercase tracking-wider text-gray-400">תיאור</h2>
+              <p className="text-[15px] leading-relaxed text-slate-600">{description}</p>
+            </div>
+          )}
+
+          {/* Amenities */}
+          {amenities.length > 0 && (
+            <div className="mb-6">
+              <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-gray-400">מתקנים</h2>
+              <div className="flex flex-wrap gap-2">
+                {amenities.map((a) => (
+                  <span
+                    key={a}
+                    className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3.5 py-1.5 text-sm font-medium text-slate-700"
+                  >
+                    <span>{AMENITY_ICONS[a] ?? '✓'}</span>
+                    {a}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Host details */}
+          {deal.hostName && (
+            <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+              <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-gray-400">פרטי המארח</h2>
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-600">
+                  <User size={18} />
+                </div>
+                <div>
+                  <p className="font-bold text-slate-800">{deal.hostName}</p>
+                  {deal.hostEmail && (
+                    <p className="text-xs text-gray-500">{deal.hostEmail}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Sticky action bar ──── */}
+        <div className="absolute inset-x-0 bottom-0 border-t border-gray-100 bg-white/95 px-5 py-4 backdrop-blur-sm sm:px-7">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-black text-slate-900">
+                  {deal.price_per_night_ils.toLocaleString('he-IL')} ₪
+                </span>
+              </div>
+              <p className="text-xs text-gray-400">
+                <span className="line-through decoration-gray-300">{limit.toLocaleString('he-IL')} ₪</span>
+                <span className="mr-1">{t.perNight}</span>
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {deal.hostPhone ? (
+                <>
+                  <a
+                    href={`https://wa.me/${deal.hostPhone.replace(/[\s\-().+]/g, '')}?text=${encodeURIComponent(`היי ${deal.hostName}, הגעתי דרך צייד הדילים. רציתי לשאול לגבי ${propertyName}...`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 rounded-xl bg-[#25D366] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-green-500 active:scale-[0.97]"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 shrink-0">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    וואטסאפ
+                  </a>
+                  <a
+                    href={`tel:${deal.hostPhone.replace(/[\s\-().]/g, '')}`}
+                    className="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition-all hover:border-slate-400 hover:bg-slate-50 active:scale-95"
+                  >
+                    <Phone size={18} />
+                  </a>
+                </>
+              ) : (
+                <a
+                  href={deal.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 rounded-xl bg-orange-600 px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-orange-500 active:scale-[0.97]"
+                >
+                  {t.bookNow}
+                  <ExternalLink size={14} className="opacity-80" />
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
