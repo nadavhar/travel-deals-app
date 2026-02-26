@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/validate-deals",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}
