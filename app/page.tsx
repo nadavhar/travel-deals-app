@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight, Share2, Check, Search, Phone } from 'lucide-react';
 import {
@@ -117,6 +117,12 @@ export default function Home() {
   const [toast, setToast]                       = useState<string | null>(null);
   const [searchQuery, setSearchQuery]           = useState('');
 
+  // Track all blob URLs created for UGC deals so we can revoke them on unmount
+  const blobUrlsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    return () => { blobUrlsRef.current.forEach((u) => URL.revokeObjectURL(u)); };
+  }, []);
+
   const t = T[lang];
 
   const tabLabel: Record<string, string> = {
@@ -139,6 +145,9 @@ export default function Home() {
     );
 
   function handlePublish(deal: Deal) {
+    // Register blob URLs for cleanup on page unmount
+    deal.imageUrls?.forEach((u) => { if (u.startsWith('blob:')) blobUrlsRef.current.add(u); });
+    if (deal.videoUrl?.startsWith('blob:')) blobUrlsRef.current.add(deal.videoUrl);
     setDeals((prev) => [deal, ...prev]);
     setShowPublishModal(false);
     setToast('הדיל פורסם בהצלחה!');
@@ -353,6 +362,14 @@ function PublishModal({
       : null;
   const urlError = url !== '' && !url.startsWith('https://');
 
+  // Strip formatting chars, then require 9–13 digits (covers Israeli 0X-XXXXXXXX
+  // and international +972-XX-XXXXXXX after stripping the +)
+  const phoneDigits = hostPhone.replace(/[\s\-().+]/g, '');
+  const phoneError  =
+    hostPhone.trim() !== '' && !/^\d{9,13}$/.test(phoneDigits)
+      ? 'מספר טלפון לא תקין (9–13 ספרות)'
+      : null;
+
   const isValid =
     propertyName.trim() !== '' &&
     location.trim() !== '' &&
@@ -361,7 +378,8 @@ function PublishModal({
     !priceError &&
     !urlError &&
     hostName.trim() !== '' &&
-    hostPhone.trim() !== '';
+    hostPhone.trim() !== '' &&
+    !phoneError;
 
   function addFiles(files: File[]) {
     const next: MediaFile[] = files
@@ -586,8 +604,14 @@ function PublishModal({
                   טלפון / וואטסאפ <span className="text-red-400">*</span>
                 </label>
                 <input type="tel" value={hostPhone} onChange={(e) => setHostPhone(e.target.value)}
-                  placeholder="050-1234567" maxLength={10} className={inputCls} required />
-                <p className="mt-1 text-xs text-gray-400">יוצג כפתורי וואטסאפ ושיחה ישירה על הדיל</p>
+                  placeholder="050-1234567"
+                  className={`w-full rounded-xl border px-4 py-2.5 text-sm text-slate-900 placeholder-gray-400 outline-none transition focus:ring-2 ${
+                    phoneError ? 'border-red-400 focus:border-red-400 focus:ring-red-100' : 'border-gray-200 focus:border-orange-400 focus:ring-orange-100'
+                  }`} required />
+                {phoneError
+                  ? <p className="mt-1 text-xs font-medium text-red-500">{phoneError}</p>
+                  : <p className="mt-1 text-xs text-gray-400">יוצג כפתורי וואטסאפ ושיחה ישירה על הדיל</p>
+                }
               </div>
 
               <div>
