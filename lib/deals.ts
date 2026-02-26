@@ -71,26 +71,6 @@ export const BUDGET_LIMITS: Record<Category, number> = {
   villa: 1990,
 };
 
-export const CATEGORY_LABELS: Record<Category, string> = {
-  vacation: 'חופשה',
-  suite: 'סוויטה',
-  penthouse: 'פנטהאוז',
-  villa: 'וילה',
-};
-
-export const CATEGORY_COLORS: Record<Category, string> = {
-  vacation: 'bg-sky-100 text-sky-800',
-  suite: 'bg-purple-100 text-purple-800',
-  penthouse: 'bg-amber-100 text-amber-800',
-  villa: 'bg-emerald-100 text-emerald-800',
-};
-
-export const CATEGORY_ACCENT: Record<Category, string> = {
-  vacation: 'bg-sky-500',
-  suite: 'bg-purple-500',
-  penthouse: 'bg-amber-500',
-  villa: 'bg-emerald-500',
-};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SAMPLE PAYLOAD  (47 valid · 17 invalid — location, budget & URL violations)

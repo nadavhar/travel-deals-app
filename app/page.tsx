@@ -89,12 +89,7 @@ const T = {
 } satisfies Record<Lang, unknown>;
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
-const CAT_RING: Record<Category, string> = {
-  vacation:  'sm:hover:ring-orange-200',
-  suite:     'sm:hover:ring-orange-200',
-  penthouse: 'sm:hover:ring-orange-200',
-  villa:     'sm:hover:ring-orange-200',
-};
+const CAT_RING_CLS = 'sm:hover:ring-orange-200';
 const CAT_DOT: Record<Category, string> = {
   vacation:  'bg-sky-400',
   suite:     'bg-violet-400',
@@ -148,13 +143,20 @@ export default function Home() {
   const q = searchQuery.trim().toLowerCase();
 
   // Deals filtered by search only (used for accurate pill counts)
-  const searchFilteredDeals = useMemo(() =>
-    !q ? deals : deals.filter((d) =>
-      d.property_name.toLowerCase().includes(q) ||
-      d.location.toLowerCase().includes(q) ||
-      d.description.toLowerCase().includes(q)
-    ),
-  [deals, q]);
+  const searchFilteredDeals = useMemo(() => {
+    if (!q) return deals;
+    return deals.filter((d) => {
+      if (d.property_name.toLowerCase().includes(q)) return true;
+      if (d.location.toLowerCase().includes(q)) return true;
+      if (d.description.toLowerCase().includes(q)) return true;
+      if (lang === 'EN') {
+        if (d.property_name_en?.toLowerCase().includes(q)) return true;
+        if (d.location_en?.toLowerCase().includes(q)) return true;
+        if (d.description_en?.toLowerCase().includes(q)) return true;
+      }
+      return false;
+    });
+  }, [deals, q, lang]);
 
   // Deals filtered by both search AND active category tab
   const filteredDeals = useMemo(() =>
@@ -234,6 +236,7 @@ export default function Home() {
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
+                aria-label={lang === 'EN' ? 'Clear search' : 'נקה חיפוש'}
                 className="absolute left-4 text-gray-400 hover:text-gray-600"
               >
                 <X size={14} />
@@ -726,7 +729,7 @@ const DealCard = memo(function DealCard({
           sm:hover:-translate-y-1.5
           sm:hover:shadow-[0_16px_40px_rgba(0,0,0,0.13),0_2px_8px_rgba(0,0,0,0.05)]
           sm:hover:ring-2
-          ${CAT_RING[deal.category]}`}
+          ${CAT_RING_CLS}`}
       >
         {/* ── Image / Carousel area ────────────────────────────────────────── */}
         <div className="relative aspect-[3/2] overflow-hidden bg-gray-100" dir="ltr">
@@ -754,13 +757,15 @@ const DealCard = memo(function DealCard({
                 <>
                   <button
                     onClick={prev}
-                    className="absolute left-2 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-700 opacity-0 shadow backdrop-blur-sm transition-opacity group-hover:opacity-100 hover:bg-white"
+                    aria-label="תמונה קודמת"
+                    className="absolute left-2 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow backdrop-blur-sm transition-opacity hover:bg-white sm:opacity-0 sm:group-hover:opacity-100"
                   >
                     <ChevronLeft size={14} />
                   </button>
                   <button
                     onClick={next}
-                    className="absolute right-2 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-700 opacity-0 shadow backdrop-blur-sm transition-opacity group-hover:opacity-100 hover:bg-white"
+                    aria-label="תמונה הבאה"
+                    className="absolute right-2 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow backdrop-blur-sm transition-opacity hover:bg-white sm:opacity-0 sm:group-hover:opacity-100"
                   >
                     <ChevronRight size={14} />
                   </button>
@@ -769,15 +774,18 @@ const DealCard = memo(function DealCard({
 
               {/* Dots */}
               {totalSlides > 1 && (
-                <div className="absolute bottom-10 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
+                <div className="absolute bottom-10 left-1/2 z-10 flex -translate-x-1/2 gap-0.5">
                   {images.map((_, i) => (
                     <button
                       key={i}
                       onClick={(e) => { e.preventDefault(); setActiveSlide(i); }}
-                      className={`h-1.5 rounded-full transition-all ${
+                      aria-label={`תמונה ${i + 1}`}
+                      className="p-1.5"
+                    >
+                      <span className={`block h-1.5 rounded-full transition-all ${
                         i === activeSlide ? 'w-4 bg-white' : 'w-1.5 bg-white/60'
-                      }`}
-                    />
+                      }`} />
+                    </button>
                   ))}
                 </div>
               )}
@@ -923,10 +931,16 @@ const DealCard = memo(function DealCard({
       {/* ── Video Modal ──────────────────────────────────────────────────────── */}
       {showVideo && deal.videoUrl && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="סרטון נכס"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
           onClick={() => setShowVideo(false)}
+          onKeyDown={(e) => { if (e.key === 'Escape') setShowVideo(false); }}
         >
           <button
+            autoFocus
+            aria-label="סגור סרטון"
             className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
             onClick={() => setShowVideo(false)}
           >

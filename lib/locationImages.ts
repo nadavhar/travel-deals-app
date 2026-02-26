@@ -188,6 +188,16 @@ export const LOCATION_IMAGE_MAP: Record<string, string[]> = {
   'default':      DEFAULT_POOL,
 };
 
+/** Shared lookup: returns the matching pool or the default pool. */
+function findPool(location: string): string[] {
+  for (const [keyword, pool] of Object.entries(LOCATION_IMAGE_MAP)) {
+    if (keyword !== 'default' && location.includes(keyword)) {
+      return pool;
+    }
+  }
+  return LOCATION_IMAGE_MAP['default'];
+}
+
 /**
  * Returns the first keyword in LOCATION_IMAGE_MAP that matches `location`,
  * or 'default' if nothing matches. Used to group deals by their image pool.
@@ -208,11 +218,6 @@ export function getLocationKey(location: string): string {
  * sequential counter so each deal in the same location gets a different image.
  */
 export function getLocationImage(location: string, seed: number = 0): string {
-  for (const [keyword, pool] of Object.entries(LOCATION_IMAGE_MAP)) {
-    if (keyword !== 'default' && location.includes(keyword)) {
-      return pool[seed % pool.length];
-    }
-  }
-  const fallback = LOCATION_IMAGE_MAP['default'];
-  return fallback[seed % fallback.length];
+  const pool = findPool(location);
+  return pool[seed % pool.length];
 }
