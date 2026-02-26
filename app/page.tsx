@@ -152,7 +152,7 @@ export default function Home() {
       <div className="sticky top-0 z-40 bg-white shadow-sm">
 
         {/* ── Centered logo + subtitle ─────────────────────────────────────── */}
-        <div className="relative px-4 pb-5 pt-6 text-center">
+        <div className="relative px-4 pb-4 pt-6 text-center">
 
           {/* Language switcher — left */}
           <button
@@ -190,20 +190,23 @@ export default function Home() {
         <div className="border-b border-gray-200" />
 
         {/* ── Search bar ───────────────────────────────────────────────────── */}
-        <div className="mx-auto max-w-5xl px-4 pb-3">
-          <div className="relative" dir="rtl">
-            <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <div className="mx-auto mt-5 max-w-5xl px-4">
+          <div
+            className="relative flex items-center rounded-full border border-gray-200 bg-gray-50 transition-all focus-within:border-orange-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-orange-500/20"
+            dir="rtl"
+          >
+            <Search className="pointer-events-none absolute right-4 h-4 w-4 shrink-0 text-gray-400" />
             <input
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t.searchPlaceholder}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pr-9 pl-9 text-sm text-slate-800 placeholder-gray-400 outline-none transition focus:border-orange-400 focus:bg-white focus:ring-2 focus:ring-orange-100"
+              className="w-full bg-transparent py-2.5 pr-11 pl-10 text-sm text-slate-800 placeholder-gray-400 outline-none"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute left-4 text-gray-400 hover:text-gray-600"
               >
                 <X size={14} />
               </button>
