@@ -510,7 +510,7 @@ function PublishModal({
         {/* ── Modal header ──── */}
         <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-3xl bg-white px-6 py-4 shadow-[0_1px_0_#f1f5f9]">
           <h2 className="text-lg font-black text-slate-900">{modalTitle}</h2>
-          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200">
+          <button type="button" onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200">
             <X size={16} />
           </button>
         </div>
@@ -564,7 +564,7 @@ function PublishModal({
             <div>
               <label className="mb-1.5 block text-sm font-semibold text-slate-700">שם המקום <span className="text-red-400">*</span></label>
               <input type="text" value={propertyName} onChange={(e) => setPropertyName(e.target.value)}
-                placeholder="לדוגמה: וילת הכרמל" className={inputCls} required />
+                placeholder="לדוגמה: וילת הכרמל" className={inputCls} required autoFocus />
             </div>
 
             <div>
@@ -750,9 +750,11 @@ const DealCard = memo(function DealCard({
     if (typeof navigator.share === 'function' && navigator.canShare?.(shareData)) {
       try { await navigator.share(shareData); } catch { /* user dismissed */ }
     } else {
-      await navigator.clipboard.writeText(deal.url);
-      setShareFeedback(true);
-      setTimeout(() => setShareFeedback(false), 2000);
+      try {
+        await navigator.clipboard.writeText(deal.url);
+        setShareFeedback(true);
+        setTimeout(() => setShareFeedback(false), 2000);
+      } catch { /* clipboard permission denied */ }
     }
   }
 
