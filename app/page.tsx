@@ -340,6 +340,7 @@ function PublishModal({
   const [hostName, setHostName]         = useState('');
   const [hostPhone, setHostPhone]       = useState('');
   const [hostEmail, setHostEmail]       = useState('');
+  const [amenities, setAmenities]       = useState<string[]>([]);
   const [mediaFiles, setMediaFiles]     = useState<MediaFile[]>([]);
   const [isDragging, setIsDragging]     = useState(false);
   const fileInputRef                    = useRef<HTMLInputElement>(null);
@@ -409,6 +410,7 @@ function PublishModal({
       hostName:  hostName.trim(),
       hostPhone: hostPhone.trim(),
       hostEmail: hostEmail.trim() || null,
+      amenities: amenities.length > 0 ? amenities : undefined,
     });
   }
 
@@ -521,6 +523,33 @@ function PublishModal({
               </div>
             </div>
 
+            {/* ── Amenities chips ──── */}
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                מתקנים בנכס <span className="font-normal text-gray-400">(אופציונלי)</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {['בריכה', "ג'קוזי", 'חניה חינם', 'WiFi', 'מטבח מאובזר', 'מתאים לבעלי חיים', 'מנגל'].map((a) => {
+                  const selected = amenities.includes(a);
+                  return (
+                    <button
+                      key={a}
+                      type="button"
+                      onClick={() => setAmenities((prev) => selected ? prev.filter((x) => x !== a) : [...prev, a])}
+                      className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all active:scale-95 ${
+                        selected
+                          ? 'border-orange-500 bg-orange-50 text-orange-600'
+                          : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {selected && <span className="ml-1 text-orange-500">✓</span>}
+                      {a}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* URL — optional when host phone provided */}
             <div>
               <label className="mb-1.5 block text-sm font-semibold text-slate-700">
@@ -557,7 +586,7 @@ function PublishModal({
                   טלפון / וואטסאפ <span className="text-red-400">*</span>
                 </label>
                 <input type="tel" value={hostPhone} onChange={(e) => setHostPhone(e.target.value)}
-                  placeholder="050-1234567" className={inputCls} required />
+                  placeholder="050-1234567" maxLength={10} className={inputCls} required />
                 <p className="mt-1 text-xs text-gray-400">יוצג כפתורי וואטסאפ ושיחה ישירה על הדיל</p>
               </div>
 

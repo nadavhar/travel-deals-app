@@ -41,6 +41,8 @@ export interface Deal {
   hostName?:  string;
   hostPhone?: string;
   hostEmail?: string | null;
+  /** UGC amenities selected by the host */
+  amenities?: string[];
 }
 
 export interface FilterResult {
