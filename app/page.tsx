@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Image from 'next/image';
-import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight, Share2, Check } from 'lucide-react';
 import {
   filterDeals,
   RAW_DEALS,
@@ -592,10 +592,27 @@ function DealCard({
   t: CardT;
   catLabel: Record<Category, string>;
 }) {
-  const [imgLoaded, setImgLoaded]   = useState(false);
-  const [imgSrc, setImgSrc]         = useState(() => DEAL_IMAGES.get(deal.id) ?? FALLBACK_IMG);
+  const [imgLoaded, setImgLoaded]     = useState(false);
+  const [imgSrc, setImgSrc]           = useState(() => DEAL_IMAGES.get(deal.id) ?? FALLBACK_IMG);
   const [activeSlide, setActiveSlide] = useState(0);
-  const [showVideo, setShowVideo]   = useState(false);
+  const [showVideo, setShowVideo]     = useState(false);
+  const [shareFeedback, setShareFeedback] = useState(false);
+
+  async function handleShare(e: React.MouseEvent) {
+    e.preventDefault();
+    const shareData = {
+      title: propertyName,
+      text: `${propertyName} – ${locationLabel}\n${deal.price_per_night_ils.toLocaleString('he-IL')} ₪ ללילה`,
+      url: deal.url,
+    };
+    if (typeof navigator.share === 'function' && navigator.canShare?.(shareData)) {
+      try { await navigator.share(shareData); } catch { /* user dismissed */ }
+    } else {
+      await navigator.clipboard.writeText(deal.url);
+      setShareFeedback(true);
+      setTimeout(() => setShareFeedback(false), 2000);
+    }
+  }
 
   const description   = t.lang === 'EN' && deal.description_en   ? deal.description_en   : deal.description;
   const propertyName  = t.lang === 'EN' && deal.property_name_en ? deal.property_name_en : deal.property_name;
@@ -758,17 +775,31 @@ function DealCard({
               </p>
             </div>
 
-            <a
-              href={deal.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex shrink-0 items-center gap-1.5 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-orange-500 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.97] active:shadow-none"
-            >
-              {t.bookNow}
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="h-3.5 w-3.5 opacity-80">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-              </svg>
-            </a>
+            <div className="flex items-center gap-2">
+              {/* Share button */}
+              <button
+                onClick={handleShare}
+                aria-label="שתף דיל"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 text-gray-400 transition-all hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 active:scale-95"
+              >
+                {shareFeedback
+                  ? <Check size={16} className="text-emerald-500" />
+                  : <Share2 size={16} />
+                }
+              </button>
+
+              <a
+                href={deal.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex shrink-0 items-center gap-1.5 rounded-xl bg-orange-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-orange-500 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.97] active:shadow-none"
+              >
+                {t.bookNow}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="h-3.5 w-3.5 opacity-80">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
       </article>
