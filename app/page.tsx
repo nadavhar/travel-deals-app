@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo, memo } from 'react';
 import Image from 'next/image';
-import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight, Share2, Check, Search, Phone, LogIn, ExternalLink, User } from 'lucide-react';
+import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight, Share2, Check, Search, Phone, LogIn, LogOut, ExternalLink, User, LayoutDashboard } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import {
   filterDeals,
@@ -121,6 +121,26 @@ export default function Home() {
   const [searchQuery, setSearchQuery]           = useState('');
   const [user, setUser]                         = useState<SupabaseUser | null>(null);
   const [selectedDeal, setSelectedDeal]         = useState<Deal | null>(null);
+  const [profileOpen, setProfileOpen]           = useState(false);
+  const profileRef                              = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  async function handleSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    setProfileOpen(false);
+  }
 
   // Track all blob URLs created for UGC deals so we can revoke them on unmount
   const blobUrlsRef = useRef<Set<string>>(new Set());
@@ -231,39 +251,72 @@ export default function Home() {
             <span>{t.switchLang}</span>
           </button>
 
-          {/* Right side: Publish + Auth (desktop only) */}
-          <div className="absolute right-4 top-5 hidden items-center gap-2 md:flex">
+          {/* Right side: Auth controls */}
+          <div className="absolute right-4 top-5 flex items-center gap-2">
             {user ? (
               <>
-                <a
-                  href="/my-deals"
-                  className="flex items-center gap-1 rounded-full border border-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-600 transition-all hover:bg-gray-50 active:scale-95"
-                >
-                  הדילים שלי
-                </a>
+                {/* Publish Deal — desktop only */}
                 <button
                   onClick={() => setShowPublishModal(true)}
-                  className="flex items-center gap-1 rounded-full border border-orange-500 px-3 py-1.5 text-sm font-semibold text-orange-600 transition-all hover:bg-orange-50 active:scale-95"
+                  className="hidden items-center gap-1 rounded-full border border-orange-500 px-3 py-1.5 text-sm font-semibold text-orange-600 transition-all hover:bg-orange-50 active:scale-95 md:flex"
                 >
                   {t.publishDeal}
                 </button>
+
+                {/* Avatar + dropdown */}
+                <div className="relative" ref={profileRef}>
+                  <button
+                    onClick={() => setProfileOpen((o) => !o)}
+                    aria-label="תפריט משתמש"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-600 text-sm font-black text-white shadow-sm transition-all hover:bg-orange-500 active:scale-95"
+                  >
+                    {user.email?.[0]?.toUpperCase() ?? <User size={14} />}
+                  </button>
+
+                  {profileOpen && (
+                    <div
+                      className="absolute left-0 top-11 z-50 w-60 overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-black/[0.07]"
+                      dir="rtl"
+                    >
+                      {/* User identity */}
+                      <div className="border-b border-gray-100 px-4 py-3">
+                        <p className="text-[11px] font-medium uppercase tracking-wider text-gray-400">מחובר כ</p>
+                        <p className="mt-0.5 truncate text-sm font-semibold text-slate-800">{user.email}</p>
+                      </div>
+
+                      {/* My Deals */}
+                      <a
+                        href="/my-deals"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-gray-50"
+                      >
+                        <LayoutDashboard size={15} className="shrink-0 text-gray-400" />
+                        הדילים שלי
+                      </a>
+
+                      {/* Sign out */}
+                      <div className="border-t border-gray-100">
+                        <button
+                          onClick={handleSignOut}
+                          className="flex w-full items-center gap-2.5 px-4 py-3 text-sm font-medium text-red-500 transition-colors hover:bg-red-50"
+                        >
+                          <LogOut size={15} className="shrink-0" />
+                          התנתק
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
-              <>
-                <a
-                  href="/auth"
-                  className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-600 transition-all hover:bg-gray-50 active:scale-95"
-                >
-                  <LogIn className="h-3.5 w-3.5" />
-                  כניסה
-                </a>
-                <button
-                  onClick={() => setShowPublishModal(true)}
-                  className="flex items-center gap-1 rounded-full border border-orange-500 px-3 py-1.5 text-sm font-semibold text-orange-600 transition-all hover:bg-orange-50 active:scale-95"
-                >
-                  {t.publishDeal}
-                </button>
-              </>
+              /* Logged out: Login button (text on desktop, icon on mobile) */
+              <a
+                href="/auth"
+                className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-600 transition-all hover:bg-gray-50 active:scale-95"
+              >
+                <LogIn className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">כניסה / הרשמה</span>
+              </a>
             )}
           </div>
 
