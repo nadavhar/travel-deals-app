@@ -257,7 +257,7 @@ export default function Home() {
               <>
                 {/* Publish Deal — desktop only */}
                 <button
-                  onClick={() => setShowPublishModal(true)}
+                  onClick={() => user ? setShowPublishModal(true) : window.location.href = '/auth?next=/'}
                   className="hidden items-center gap-1 rounded-full border border-orange-500 px-3 py-1.5 text-sm font-semibold text-orange-600 transition-all hover:bg-orange-50 active:scale-95 md:flex"
                 >
                   {t.publishDeal}
@@ -448,7 +448,7 @@ export default function Home() {
 
       {/* ══════════════════════════════════════════ MOBILE FAB (bottom) */}
       <button
-        onClick={() => setShowPublishModal(true)}
+        onClick={() => user ? setShowPublishModal(true) : window.location.href = '/auth?next=/'}
         className="fixed bottom-8 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#D05C3A] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(208,92,58,0.45)] transition-transform active:scale-95 md:hidden"
       >
         <span className="text-base font-bold leading-none">+</span>
