@@ -470,13 +470,14 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 p-3 sm:grid-cols-2 sm:gap-5 sm:p-5 lg:grid-cols-3 lg:gap-6 lg:p-6">
-            {filteredDeals.map((deal) => (
+            {filteredDeals.map((deal, i) => (
               <DealCard
                 key={deal.userId ? `db-${deal.id}` : `static-${deal.id}`}
                 deal={deal}
                 t={cardT}
                 catLabel={catLabel}
                 onSelect={setSelectedDeal}
+                isFirst={i === 0}
               />
             ))}
           </div>
@@ -920,11 +921,13 @@ const DealCard = memo(function DealCard({
   t,
   catLabel,
   onSelect,
+  isFirst,
 }: {
   deal: Deal;
   t: CardT;
   catLabel: Record<Category, string>;
   onSelect: (deal: Deal) => void;
+  isFirst?: boolean;
 }) {
   const [imgLoaded, setImgLoaded]     = useState(false);
   const [imgSrc, setImgSrc]           = useState(() => (!deal.userId ? DEAL_IMAGES.get(deal.id) : undefined) ?? deal.imageUrl ?? FALLBACK_IMG);
@@ -1060,6 +1063,8 @@ const DealCard = memo(function DealCard({
                 alt={locationLabel}
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                priority={isFirst}
+                unoptimized={imgSrc.includes('wikimedia.org') || imgSrc.includes('wikipedia.org')}
                 className={`object-cover transition-transform duration-700 group-hover:scale-[1.04] ${
                   imgLoaded ? 'opacity-100' : 'opacity-0'
                 }`}

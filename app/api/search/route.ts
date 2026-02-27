@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export const maxDuration = 30;
 
@@ -14,7 +14,7 @@ interface CompactDeal {
 }
 
 export async function POST(request: NextRequest) {
-  if (!process.env.OPENAI_API_KEY) {
+  if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json({ error: 'AI search not configured' }, { status: 503 });
   }
 
@@ -24,7 +24,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Missing query or deals' }, { status: 400 });
   }
 
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
   const dealsContext = deals
     .map((d) =>
@@ -32,34 +33,31 @@ export async function POST(request: NextRequest) {
     )
     .join('\n');
 
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    response_format: { type: 'json_object' },
-    messages: [
-      {
-        role: 'system',
-        content: `אתה עוזר חיפוש חכם לאתר "צייד הדילים" — אתר דילים לנסיעות בישראל.
-בהינתן רשימת הדילים הזמינים, מצא את הדילים הכי מתאימים לבקשת המשתמש.
-הגב בעברית בצורה ידידותית וקצרה (1-2 משפטים).
-אם לא נמצאו דילים מתאימים, אמור זאת בנועם.
+  const prompt = `אתה עוזר חיפוש מדויק לאתר "צייד הדילים" — אתר דילים לנסיעות בישראל.
 
-החזר JSON בדיוק בפורמט הזה:
+כללי סינון מחמירים:
+- אם המשתמש ציין מיקום — החזר רק דילים שמיקומם תואם בדיוק. אל תחזיר דילים ממקומות אחרים.
+- אם המשתמש ציין קטגוריה (וילה, סוויטה, פנטהאוז, חופשה) — החזר רק דילים מאותה קטגוריה.
+- אם המשתמש ציין מתקן (בריכה, ג'קוזי וכו') — החזר רק דילים שיש להם את המתקן הזה.
+- אם לא נמצאו דילים שעומדים בכל התנאים — החזר ids: [] ואמור שלא נמצאו תוצאות מתאימות.
+- עדיף להחזיר פחות תוצאות ומדויקות מאשר תוצאות לא רלוונטיות.
+
+הגב בעברית בצורה ידידותית וקצרה (1-2 משפטים).
+
+החזר JSON בדיוק בפורמט הזה (ללא markdown, רק JSON):
 {"message": "...", "ids": [1, 2, 3]}
 
 רשימת הדילים:
-${dealsContext}`,
-      },
-      {
-        role: 'user',
-        content: query,
-      },
-    ],
-    max_tokens: 400,
-    temperature: 0.4,
-  });
+${dealsContext}
 
-  const raw = completion.choices[0]?.message?.content ?? '{}';
-  const parsed = JSON.parse(raw) as { message?: string; ids?: number[] };
+בקשת המשתמש: ${query}`;
+
+  const result = await model.generateContent(prompt);
+  const raw = result.response.text().trim();
+
+  // Strip markdown code fences if present
+  const cleaned = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
+  const parsed = JSON.parse(cleaned) as { message?: string; ids?: number[] };
 
   return NextResponse.json({
     message: parsed.message ?? 'הנה מה שמצאתי:',
