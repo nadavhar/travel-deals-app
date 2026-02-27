@@ -337,27 +337,39 @@ export default function Home() {
 
         {/* ── Search bar ───────────────────────────────────────────────────── */}
         <div className="mx-auto mt-5 max-w-5xl px-4">
-          <div
-            className="relative flex items-center rounded-full border border-gray-200 bg-gray-50 transition-all focus-within:border-orange-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-orange-500/20"
-            dir="rtl"
-          >
-            <Search className="pointer-events-none absolute right-4 h-4 w-4 shrink-0 text-gray-400" />
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t.searchPlaceholder}
-              className="w-full bg-transparent py-2.5 pr-11 pl-10 text-sm text-slate-800 placeholder-gray-400 outline-none"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                aria-label={lang === 'EN' ? 'Clear search' : 'נקה חיפוש'}
-                className="absolute left-4 text-gray-400 hover:text-gray-600"
-              >
-                <X size={14} />
-              </button>
-            )}
+          <div className="flex items-center gap-2">
+            {/* Search input */}
+            <div
+              className="relative flex flex-1 items-center rounded-full border border-gray-200 bg-gray-50 transition-all focus-within:border-orange-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-orange-500/20"
+              dir="rtl"
+            >
+              <Search className="pointer-events-none absolute right-4 h-4 w-4 shrink-0 text-gray-400" />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t.searchPlaceholder}
+                className="w-full bg-transparent py-2.5 pr-11 pl-10 text-sm text-slate-800 placeholder-gray-400 outline-none"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  aria-label={lang === 'EN' ? 'Clear search' : 'נקה חיפוש'}
+                  className="absolute left-4 text-gray-400 hover:text-gray-600"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            {/* Add Deal — mobile only, inline with search */}
+            <button
+              onClick={() => user ? setShowPublishModal(true) : window.location.href = '/auth?next=/'}
+              aria-label="פרסם דיל"
+              className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-orange-600 text-white shadow-sm transition-all hover:bg-orange-500 active:scale-95 md:hidden"
+            >
+              <span className="text-xl font-bold leading-none">+</span>
+            </button>
           </div>
         </div>
 
@@ -375,7 +387,7 @@ export default function Home() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveFilter(tab.id)}
-                    className={`flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 active:scale-95 ${
+                    className={`flex h-[42px] shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-all duration-200 active:scale-95 ${
                       isActive
                         ? 'bg-orange-600 text-white shadow-md shadow-orange-600/20'
                         : 'border border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
@@ -446,14 +458,6 @@ export default function Home() {
         />
       )}
 
-      {/* ══════════════════════════════════════════ MOBILE FAB (bottom) */}
-      <button
-        onClick={() => user ? setShowPublishModal(true) : window.location.href = '/auth?next=/'}
-        className="fixed bottom-8 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#D05C3A] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(208,92,58,0.45)] transition-transform active:scale-95 md:hidden"
-      >
-        <span className="text-base font-bold leading-none">+</span>
-        <span>{t.publishSubmit}</span>
-      </button>
 
       {/* ══════════════════════════════════════════════ DEAL DETAIL MODAL */}
       {selectedDeal && (
