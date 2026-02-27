@@ -140,8 +140,14 @@ ${dealsContext}
   const cleaned = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
   const parsed = JSON.parse(cleaned) as { message?: string; ids?: number[] };
 
+  // Only allow IDs that were in the pre-filtered list — prevent AI hallucination
+  const filteredIdSet = new Set(filtered.map((d) => d.id));
+  const safeIds = Array.isArray(parsed.ids)
+    ? parsed.ids.filter((id) => filteredIdSet.has(id))
+    : filtered.map((d) => d.id);
+
   return NextResponse.json({
     message: parsed.message ?? `מצאתי ${filtered.length} דילים מתאימים:`,
-    ids: Array.isArray(parsed.ids) ? parsed.ids : filtered.map((d) => d.id),
+    ids: safeIds.length > 0 ? safeIds : filtered.map((d) => d.id),
   });
 }
