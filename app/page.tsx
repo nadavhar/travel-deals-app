@@ -333,6 +333,15 @@ export default function Home() {
                   )}
                 </div>
 
+                {/* Add Deal — mobile only, next to avatar */}
+                <button
+                  onClick={() => user ? setShowPublishModal(true) : window.location.href = '/auth?next=/'}
+                  aria-label="פרסם דיל"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-800 text-white shadow-sm transition-all hover:bg-slate-700 active:scale-95 md:hidden"
+                >
+                  <span className="text-xl font-bold leading-none">+</span>
+                </button>
+
                 {/* Publish Deal — desktop only */}
                 <button
                   onClick={() => user ? setShowPublishModal(true) : window.location.href = '/auth?next=/'}
@@ -342,14 +351,23 @@ export default function Home() {
                 </button>
               </>
             ) : (
-              /* Logged out: Login button (text on desktop, icon on mobile) */
-              <a
-                href="/auth"
-                className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-600 transition-all hover:bg-gray-50 active:scale-95"
-              >
-                <LogIn className="h-3.5 w-3.5" />
-                <span className="hidden md:inline">כניסה / הרשמה</span>
-              </a>
+              /* Logged out */
+              <>
+                <button
+                  onClick={() => window.location.href = '/auth?next=/'}
+                  aria-label="פרסם דיל"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-800 text-white shadow-sm transition-all hover:bg-slate-700 active:scale-95 md:hidden"
+                >
+                  <span className="text-xl font-bold leading-none">+</span>
+                </button>
+                <a
+                  href="/auth"
+                  className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-600 transition-all hover:bg-gray-50 active:scale-95"
+                >
+                  <LogIn className="h-3.5 w-3.5" />
+                  <span className="hidden md:inline">כניסה / הרשמה</span>
+                </a>
+              </>
             )}
           </div>
 
@@ -404,15 +422,6 @@ export default function Home() {
               }
             </button>
 
-            {/* Add Deal — mobile only */}
-            <button
-              type="button"
-              onClick={() => user ? setShowPublishModal(true) : window.location.href = '/auth?next=/'}
-              aria-label="פרסם דיל"
-              className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-slate-800 text-white shadow-sm transition-all hover:bg-slate-700 active:scale-95 md:hidden"
-            >
-              <span className="text-xl font-bold leading-none">+</span>
-            </button>
           </form>
 
           {/* AI response bubble */}
