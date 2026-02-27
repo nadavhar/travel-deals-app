@@ -13,6 +13,87 @@ interface CompactDeal {
   description: string;
 }
 
+// ── Deterministic pre-filters ────────────────────────────────────────────────
+
+const CATEGORY_KEYWORDS: Array<{ words: string[]; category: string }> = [
+  { words: ['וילה', 'וילת'],                              category: 'villa' },
+  { words: ['סוויטה', 'סוויט'],                           category: 'suite' },
+  { words: ['פנטהאוז', 'פנטהאוס'],                        category: 'penthouse' },
+  { words: ['חופשה', 'מלון', 'צימר', 'הוסטל', 'אכסניה'], category: 'vacation' },
+];
+
+const AMENITY_KEYWORDS: Array<{ words: string[]; amenity: string }> = [
+  { words: ['בריכה', 'pool'],                              amenity: 'בריכה' },
+  { words: ["ג'קוזי", 'ג׳קוזי', 'jacuzzi', 'ג קוזי'],   amenity: "ג'קוזי" },
+  { words: ['חניה'],                                       amenity: 'חניה חינם' },
+  { words: ['wifi', 'וויפי', 'אינטרנט'],                  amenity: 'WiFi' },
+  { words: ['מטבח'],                                       amenity: 'מטבח מאובזר' },
+  { words: ['בעלי חיים', 'כלב', 'חיות'],                 amenity: 'מתאים לבעלי חיים' },
+  { words: ['מנגל', 'ברביקיו', 'bbq'],                    amenity: 'מנגל' },
+];
+
+const LOCATION_KEYWORDS: Array<{ words: string[]; locations: string[] }> = [
+  { words: ['תל אביב', 'ת"א', 'יפו'],          locations: ['תל אביב', 'יפו, תל אביב'] },
+  { words: ['ירושלים'],                          locations: ['ירושלים'] },
+  { words: ['אילת'],                             locations: ['אילת'] },
+  { words: ['חיפה', 'כרמל'],                    locations: ['חיפה'] },
+  { words: ['אשקלון'],                           locations: ['אשקלון'] },
+  { words: ['אשדוד'],                            locations: ['אשדוד'] },
+  { words: ['נתניה'],                            locations: ['נתניה'] },
+  { words: ['טבריה', 'כנרת'],                   locations: ['טבריה', 'כנרת, עמק הירדן'] },
+  { words: ['ים המלח', 'ים-המלח'],              locations: ['ים המלח', 'אבנת, ים המלח', 'עין גדי, ים המלח'] },
+  { words: ['גליל', 'גלילי'],                    locations: ['גליל עליון'] },
+  { words: ['גולן', 'גולני'],                    locations: ['רמת הגולן'] },
+  { words: ['ערד'],                              locations: ['ערד'] },
+  { words: ['צפת'],                              locations: ['צפת'] },
+  { words: ['עכו'],                              locations: ['עכו'] },
+  { words: ['נצרת'],                             locations: ['נצרת'] },
+  { words: ['מצפה רמון', 'מכתש'],               locations: ['מצפה רמון'] },
+  { words: ['זיכרון יעקב', 'זכרון'],            locations: ['זיכרון יעקב'] },
+  { words: ['הרצליה'],                           locations: ['הרצליה פיתוח'] },
+  { words: ['קיסריה'],                           locations: ['קיסריה'] },
+  { words: ['ערבה', 'נגב'],                      locations: ['ערבה, נגב'] },
+];
+
+function normalize(s: string) { return s.toLowerCase(); }
+
+function preFilter(query: string, deals: CompactDeal[]): CompactDeal[] {
+  const q = normalize(query);
+  let result = deals;
+
+  // Category filter
+  for (const { words, category } of CATEGORY_KEYWORDS) {
+    if (words.some((w) => q.includes(normalize(w)))) {
+      result = result.filter((d) => d.category === category);
+      break;
+    }
+  }
+
+  // Location filter
+  for (const { words, locations } of LOCATION_KEYWORDS) {
+    if (words.some((w) => q.includes(normalize(w)))) {
+      result = result.filter((d) =>
+        locations.some((loc) => d.location.includes(loc) || loc.includes(d.location)),
+      );
+      break;
+    }
+  }
+
+  // Amenity filter — check amenities array AND description (static deals store it in description)
+  for (const { words, amenity } of AMENITY_KEYWORDS) {
+    if (words.some((w) => q.includes(normalize(w)))) {
+      result = result.filter((d) =>
+        d.amenities.includes(amenity) ||
+        d.description.includes(amenity.replace("ג'קוזי", 'קוזי').replace('בריכה', 'בריכ')),
+      );
+    }
+  }
+
+  return result;
+}
+
+// ── Route handler ────────────────────────────────────────────────────────────
+
 export async function POST(request: NextRequest) {
   if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json({ error: 'AI search not configured' }, { status: 503 });
@@ -24,43 +105,43 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Missing query or deals' }, { status: 400 });
   }
 
+  // 1. Deterministic pre-filter (no AI involved)
+  const filtered = preFilter(query, deals);
+
+  // 2. If no results — return immediately without calling Gemini
+  if (filtered.length === 0) {
+    return NextResponse.json({
+      message: 'לא נמצאו דילים התואמים את החיפוש שלך. נסה חיפוש אחר.',
+      ids: [],
+    });
+  }
+
+  // 3. Ask Gemini only to rank + write a friendly message (no filtering needed)
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-  const dealsContext = deals
+  const dealsContext = filtered
     .map((d) =>
-      `ID:${d.id} | ${d.category} | ${d.property_name} | ${d.location} | ${d.price}₪ | מתקנים: ${d.amenities.join(', ') || 'ללא'} | ${d.description}`,
+      `ID:${d.id} | ${d.property_name} | ${d.location} | ${d.price}₪ | ${d.description}`,
     )
     .join('\n');
 
-  const prompt = `אתה עוזר חיפוש מדויק לאתר "צייד הדילים" — אתר דילים לנסיעות בישראל.
+  const prompt = `אתה עוזר ידידותי לאתר דילים לנסיעות בישראל.
+המשתמש חיפש: "${query}"
+מצאנו את הדילים הבאים שכבר סוננו והם רלוונטיים:
 
-כללי סינון מחמירים:
-- אם המשתמש ציין מיקום — החזר רק דילים שמיקומם תואם בדיוק. אל תחזיר דילים ממקומות אחרים.
-- אם המשתמש ציין קטגוריה (וילה, סוויטה, פנטהאוז, חופשה) — החזר רק דילים מאותה קטגוריה.
-- אם המשתמש ציין מתקן (בריכה, ג'קוזי וכו') — החזר רק דילים שיש להם את המתקן הזה.
-- אם לא נמצאו דילים שעומדים בכל התנאים — החזר ids: [] ואמור שלא נמצאו תוצאות מתאימות.
-- עדיף להחזיר פחות תוצאות ומדויקות מאשר תוצאות לא רלוונטיות.
-
-הגב בעברית בצורה ידידותית וקצרה (1-2 משפטים).
-
-החזר JSON בדיוק בפורמט הזה (ללא markdown, רק JSON):
-{"message": "...", "ids": [1, 2, 3]}
-
-רשימת הדילים:
 ${dealsContext}
 
-בקשת המשתמש: ${query}`;
+דרג אותם לפי התאמה לבקשה והחזר JSON בלבד (ללא markdown):
+{"message": "1-2 משפטים ידידותיים בעברית על מה שמצאת", "ids": [מסודר לפי הכי מתאים]}`;
 
   const result = await model.generateContent(prompt);
   const raw = result.response.text().trim();
-
-  // Strip markdown code fences if present
   const cleaned = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
   const parsed = JSON.parse(cleaned) as { message?: string; ids?: number[] };
 
   return NextResponse.json({
-    message: parsed.message ?? 'הנה מה שמצאתי:',
-    ids:     Array.isArray(parsed.ids) ? parsed.ids : [],
+    message: parsed.message ?? `מצאתי ${filtered.length} דילים מתאימים:`,
+    ids: Array.isArray(parsed.ids) ? parsed.ids : filtered.map((d) => d.id),
   });
 }
