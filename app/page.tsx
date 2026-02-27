@@ -255,14 +255,6 @@ export default function Home() {
           <div className="absolute right-4 top-5 flex items-center gap-2">
             {user ? (
               <>
-                {/* Publish Deal — desktop only */}
-                <button
-                  onClick={() => user ? setShowPublishModal(true) : window.location.href = '/auth?next=/'}
-                  className="hidden items-center gap-1 rounded-full border border-orange-500 px-3 py-1.5 text-sm font-semibold text-orange-600 transition-all hover:bg-orange-50 active:scale-95 md:flex"
-                >
-                  {t.publishDeal}
-                </button>
-
                 {/* Avatar + dropdown */}
                 <div className="relative" ref={profileRef}>
                   <button
@@ -307,6 +299,14 @@ export default function Home() {
                     </div>
                   )}
                 </div>
+
+                {/* Publish Deal — desktop only */}
+                <button
+                  onClick={() => user ? setShowPublishModal(true) : window.location.href = '/auth?next=/'}
+                  className="hidden items-center gap-1 rounded-full border border-orange-500 px-3 py-1.5 text-sm font-semibold text-orange-600 transition-all hover:bg-orange-50 active:scale-95 md:flex"
+                >
+                  {t.publishDeal}
+                </button>
               </>
             ) : (
               /* Logged out: Login button (text on desktop, icon on mobile) */
