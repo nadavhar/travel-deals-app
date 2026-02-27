@@ -755,7 +755,7 @@ function PublishModal({
             <div>
               <label className="mb-1.5 block text-sm font-semibold text-slate-700">שם המקום <span className="text-red-400">*</span></label>
               <input type="text" value={propertyName} onChange={(e) => setPropertyName(e.target.value)}
-                placeholder="לדוגמה: וילת הכרמל" className={inputCls} required autoFocus />
+                placeholder="לדוגמה: וילת הכרמל" className={inputCls} required />
             </div>
 
             <div>
