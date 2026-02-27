@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 export const maxDuration = 30;
 
 interface CompactDeal {
-  id: number;
+  id: string; // uid: 'static-{n}' or 'db-{n}' — unique across static and DB deals
   category: string;
   property_name: string;
   location: string;
@@ -16,10 +16,10 @@ interface CompactDeal {
 // ── Deterministic pre-filters ────────────────────────────────────────────────
 
 const CATEGORY_KEYWORDS: Array<{ words: string[]; category: string }> = [
-  { words: ['וילה', 'וילת'],                              category: 'villa' },
-  { words: ['סוויטה', 'סוויט'],                           category: 'suite' },
-  { words: ['פנטהאוז', 'פנטהאוס'],                        category: 'penthouse' },
-  { words: ['חופשה', 'מלון', 'צימר', 'הוסטל', 'אכסניה'], category: 'vacation' },
+  { words: ['וילה', 'וילת', 'וילות'],                              category: 'villa' },
+  { words: ['סוויטה', 'סוויט', 'סוויטות'],                        category: 'suite' },
+  { words: ['פנטהאוז', 'פנטהאוס', 'פנטהאוזים'],                   category: 'penthouse' },
+  { words: ['חופשה', 'מלון', 'צימר', 'הוסטל', 'אכסניה', 'מלונות', 'צימרים'], category: 'vacation' },
 ];
 
 const AMENITY_KEYWORDS: Array<{ words: string[]; amenity: string }> = [
@@ -138,12 +138,12 @@ ${dealsContext}
   const result = await model.generateContent(prompt);
   const raw = result.response.text().trim();
   const cleaned = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
-  const parsed = JSON.parse(cleaned) as { message?: string; ids?: number[] };
+  const parsed = JSON.parse(cleaned) as { message?: string; ids?: string[] };
 
-  // Only allow IDs that were in the pre-filtered list — prevent AI hallucination
-  const filteredIdSet = new Set(filtered.map((d) => d.id));
+  // Only allow UIDs that were in the pre-filtered list — prevent AI hallucination
+  const filteredUidSet = new Set(filtered.map((d) => d.id));
   const safeIds = Array.isArray(parsed.ids)
-    ? parsed.ids.filter((id) => filteredIdSet.has(id))
+    ? parsed.ids.filter((uid) => filteredUidSet.has(uid))
     : filtered.map((d) => d.id);
 
   return NextResponse.json({

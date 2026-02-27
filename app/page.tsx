@@ -120,7 +120,7 @@ export default function Home() {
   const [toast, setToast]                       = useState<string | null>(null);
   const [searchQuery, setSearchQuery]           = useState('');
   const [aiLoading, setAiLoading]               = useState(false);
-  const [aiResult, setAiResult]                 = useState<{ message: string; ids: number[] } | null>(null);
+  const [aiResult, setAiResult]                 = useState<{ message: string; ids: string[] } | null>(null);
   const [user, setUser]                         = useState<SupabaseUser | null>(null);
   const [selectedDeal, setSelectedDeal]         = useState<Deal | null>(null);
   const [profileOpen, setProfileOpen]           = useState(false);
@@ -202,8 +202,9 @@ export default function Home() {
     setAiLoading(true);
     setAiResult(null);
     try {
+      // Use a unique uid (not numeric id) to avoid collisions between static and DB deals
       const compactDeals = deals.map((d) => ({
-        id:            d.id,
+        id:            d.userId ? `db-${d.id}` : `static-${d.id}`,
         category:      d.category,
         property_name: d.property_name,
         location:      d.location,
@@ -236,10 +237,10 @@ export default function Home() {
   // Otherwise show all deals
   const baseDeals = useMemo(() => {
     if (!aiResult) return deals;
-    const idSet = new Set(aiResult.ids);
-    const ordered = aiResult.ids.map((id) => deals.find((d) => d.id === id)).filter(Boolean) as Deal[];
-    const rest    = deals.filter((d) => idSet.has(d.id) && !ordered.find((o) => o.id === d.id));
-    return [...ordered, ...rest];
+    // Build uid → deal map to avoid collisions between static and DB deals with same numeric id
+    const dealsByUid = new Map(deals.map((d) => [d.userId ? `db-${d.id}` : `static-${d.id}`, d]));
+    const ordered = (aiResult.ids as string[]).map((uid) => dealsByUid.get(uid)).filter(Boolean) as Deal[];
+    return ordered;
   }, [deals, aiResult]);
 
   // Filter by category tab
