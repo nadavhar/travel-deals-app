@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo, memo } from 'react';
 import Image from 'next/image';
-import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight, Share2, Check, Search, Phone, LogIn, LogOut, ExternalLink, User, LayoutDashboard } from 'lucide-react';
+import { Compass, MapPin, Upload, X, Play, ChevronLeft, ChevronRight, Share2, Check, Search, Phone, LogIn, LogOut, ExternalLink, User, LayoutDashboard, Sparkles, SendHorizonal } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import {
   filterDeals,
@@ -119,6 +119,8 @@ export default function Home() {
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [toast, setToast]                       = useState<string | null>(null);
   const [searchQuery, setSearchQuery]           = useState('');
+  const [aiLoading, setAiLoading]               = useState(false);
+  const [aiResult, setAiResult]                 = useState<{ message: string; ids: number[] } | null>(null);
   const [user, setUser]                         = useState<SupabaseUser | null>(null);
   const [selectedDeal, setSelectedDeal]         = useState<Deal | null>(null);
   const [profileOpen, setProfileOpen]           = useState(false);
@@ -192,30 +194,60 @@ export default function Home() {
     savings: t.savings, bookNow: t.bookNow, lang,
   }), [lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const q = searchQuery.trim().toLowerCase();
+  async function handleAiSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (!q || aiLoading) return;
 
-  // Deals filtered by search only (used for accurate pill counts)
-  const searchFilteredDeals = useMemo(() => {
-    if (!q) return deals;
-    return deals.filter((d) => {
-      if (d.property_name.toLowerCase().includes(q)) return true;
-      if (d.location.toLowerCase().includes(q)) return true;
-      if (d.description.toLowerCase().includes(q)) return true;
-      if (lang === 'EN') {
-        if (d.property_name_en?.toLowerCase().includes(q)) return true;
-        if (d.location_en?.toLowerCase().includes(q)) return true;
-        if (d.description_en?.toLowerCase().includes(q)) return true;
+    setAiLoading(true);
+    setAiResult(null);
+    try {
+      const compactDeals = deals.map((d) => ({
+        id:            d.id,
+        category:      d.category,
+        property_name: d.property_name,
+        location:      d.location,
+        price:         d.price_per_night_ils,
+        amenities:     d.amenities ?? [],
+        description:   d.description,
+      }));
+      const res = await fetch('/api/search', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ query: q, deals: compactDeals }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAiResult(data);
       }
-      return false;
-    });
-  }, [deals, q, lang]);
+    } catch {
+      // fallback: keep showing all deals
+    } finally {
+      setAiLoading(false);
+    }
+  }
 
-  // Deals filtered by both search AND active category tab
-  const filteredDeals = useMemo(() =>
-    activeFilter === 'all'
-      ? searchFilteredDeals
-      : searchFilteredDeals.filter((d) => d.category === activeFilter),
-  [activeFilter, searchFilteredDeals]);
+  function clearSearch() {
+    setSearchQuery('');
+    setAiResult(null);
+  }
+
+  // When AI result is active, show only matched deals (in AI-ranked order)
+  // Otherwise show all deals
+  const baseDeals = useMemo(() => {
+    if (!aiResult) return deals;
+    const idSet = new Set(aiResult.ids);
+    const ordered = aiResult.ids.map((id) => deals.find((d) => d.id === id)).filter(Boolean) as Deal[];
+    const rest    = deals.filter((d) => idSet.has(d.id) && !ordered.find((o) => o.id === d.id));
+    return [...ordered, ...rest];
+  }, [deals, aiResult]);
+
+  // Filter by category tab
+  const searchFilteredDeals = useMemo(() =>
+    activeFilter === 'all' ? baseDeals : baseDeals.filter((d) => d.category === activeFilter),
+  [baseDeals, activeFilter]);
+
+  const filteredDeals = searchFilteredDeals;
 
   function handlePublish(deal: Deal) {
     // Register blob URLs for cleanup on page unmount
@@ -335,42 +367,63 @@ export default function Home() {
         {/* ── Divider ──────────────────────────────────────────────────────── */}
         <div className="border-b border-gray-200" />
 
-        {/* ── Search bar ───────────────────────────────────────────────────── */}
+        {/* ── AI Search ────────────────────────────────────────────────────── */}
         <div className="mx-auto mt-5 max-w-5xl px-4">
-          <div className="flex items-center gap-2">
-            {/* Search input */}
+          <form onSubmit={handleAiSearch} className="flex items-center gap-2">
+            {/* Input */}
             <div
               className="relative flex flex-1 items-center rounded-full border border-gray-200 bg-gray-50 transition-all focus-within:border-orange-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-orange-500/20"
               dir="rtl"
             >
-              <Search className="pointer-events-none absolute right-4 h-4 w-4 shrink-0 text-gray-400" />
+              <Sparkles className="pointer-events-none absolute right-4 h-4 w-4 shrink-0 text-orange-400" />
               <input
-                type="search"
+                type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t.searchPlaceholder}
+                onChange={(e) => { setSearchQuery(e.target.value); if (!e.target.value) setAiResult(null); }}
+                placeholder={lang === 'HE' ? 'שאל אותי — "וילה עם בריכה ליד הים"...' : 'Ask me — "villa with pool near the sea"...'}
                 className="w-full bg-transparent py-2.5 pr-11 pl-10 text-sm text-slate-800 placeholder-gray-400 outline-none"
               />
               {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  aria-label={lang === 'EN' ? 'Clear search' : 'נקה חיפוש'}
-                  className="absolute left-4 text-gray-400 hover:text-gray-600"
-                >
+                <button type="button" onClick={clearSearch} className="absolute left-4 text-gray-400 hover:text-gray-600">
                   <X size={14} />
                 </button>
               )}
             </div>
 
-            {/* Add Deal — mobile only, inline with search */}
+            {/* Send button */}
             <button
+              type="submit"
+              disabled={!searchQuery.trim() || aiLoading}
+              className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-orange-600 text-white shadow-sm transition-all hover:bg-orange-500 active:scale-95 disabled:opacity-50"
+              aria-label="חפש"
+            >
+              {aiLoading
+                ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                : <SendHorizonal size={16} />
+              }
+            </button>
+
+            {/* Add Deal — mobile only */}
+            <button
+              type="button"
               onClick={() => user ? setShowPublishModal(true) : window.location.href = '/auth?next=/'}
               aria-label="פרסם דיל"
-              className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-orange-600 text-white shadow-sm transition-all hover:bg-orange-500 active:scale-95 md:hidden"
+              className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-slate-800 text-white shadow-sm transition-all hover:bg-slate-700 active:scale-95 md:hidden"
             >
               <span className="text-xl font-bold leading-none">+</span>
             </button>
-          </div>
+          </form>
+
+          {/* AI response bubble */}
+          {aiResult && (
+            <div className="mt-3 flex items-start gap-2.5 rounded-2xl border border-orange-100 bg-orange-50 px-4 py-3" dir="rtl">
+              <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
+              <p className="flex-1 text-sm font-medium text-slate-700">{aiResult.message}</p>
+              <button onClick={clearSearch} className="text-gray-400 hover:text-gray-600">
+                <X size={14} />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ── Filter pills ─────────────────────────────────────────────────── */}
@@ -380,8 +433,8 @@ export default function Home() {
               {FILTER_TABS.map((tab) => {
                 const count =
                   tab.category === null
-                    ? searchFilteredDeals.length
-                    : searchFilteredDeals.filter((d) => d.category === tab.category).length;
+                    ? baseDeals.length
+                    : baseDeals.filter((d) => d.category === tab.category).length;
                 const isActive = activeFilter === tab.id;
                 return (
                   <button
